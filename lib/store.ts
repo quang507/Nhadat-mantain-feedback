@@ -256,8 +256,10 @@ export async function thuGhi(): Promise<{ ok: boolean; ghiChu: string; buoc?: st
       const repoBody = await repo.text().catch(() => '');
       const reqId = repo.headers.get('x-github-request-id');
       const server = repo.headers.get('server');
+      // x-ratelimit-limit là 60 khi GitHub coi ta là khách lạ, 5000 khi token được chấp nhận.
+      const hanMuc = repo.headers.get('x-ratelimit-limit');
       buoc.push(
-        `đọc repo: ${repo.status} · server=${server ?? 'không có'} · github-request-id=${reqId ?? 'không có'} · ${repoBody.slice(0, 100)}`,
+        `đọc repo: ${repo.status} · server=${server ?? 'không có'} · hạn mức=${hanMuc ?? 'không có'} · github-request-id=${reqId ?? 'không có'} · ${repoBody.slice(0, 100)}`,
       );
     } catch (err) {
       buoc.push(`đọc repo hỏng: ${String(err).slice(0, 120)}`);
@@ -277,6 +279,17 @@ export async function thuGhi(): Promise<{ ok: boolean; ghiChu: string; buoc?: st
       buoc.push(`đọc repo kiểu "token": ${kieuCu.status}`);
     } catch (err) {
       buoc.push(`đọc repo kiểu "token" hỏng: ${String(err).slice(0, 100)}`);
+    }
+    // /rate_limit nhận mọi token hợp lệ và không đòi quyền nào.
+    // 200 ở đây = token còn sống; hỏng ở đây = chính token có vấn đề.
+    try {
+      const hm = await fetch('https://api.github.com/rate_limit', { headers: ghHeaders(), cache: 'no-store' });
+      const hmBody = await hm.text().catch(() => '');
+      buoc.push(
+        `token còn sống không: ${hm.status} · hạn mức=${hm.headers.get('x-ratelimit-limit') ?? 'không có'} · ${hmBody.slice(0, 80)}`,
+      );
+    } catch (err) {
+      buoc.push(`hỏi hạn mức hỏng: ${String(err).slice(0, 100)}`);
     }
     try {
       const me = await fetch('https://api.github.com/user', { headers: ghHeaders(), cache: 'no-store' });
