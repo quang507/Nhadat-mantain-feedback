@@ -7,7 +7,7 @@
   "hangMuc": "Cấp thoát nước",
   "moTa": "Rò nước nhà tắm tầng 2",
   "tho": "Anh Hùng",
-  "trangThai": "cho_danh_gia",
+  "trangThai": "xong",
   "taoLuc": "2026-09-23T16:35:13.514Z",
   "log": [
     {
@@ -24,8 +24,26 @@
       "luc": "2026-09-23T16:37:08.668Z",
       "ai": "BQL",
       "viec": "Thợ báo xong — phát link đánh giá cho khách"
+    },
+    {
+      "luc": "2026-09-23T16:46:12.610Z",
+      "ai": "Khách",
+      "viec": "Xác nhận đã xong, mức hài lòng 5/5 · khen 3/4 mục"
     }
   ],
   "xongLuc": "2026-09-23T16:37:08.668Z",
-  "token": "eyJ3byI6IldPLTI2MDktMDAxIiwianRpIjoiM2E3OWM5YzdhNjA1NTczMSIsImV4cCI6MTc5Mjc3MzQyOH0.PDSl1bcjtbb5M5N_U7FpOmFBzX0Mib1NKhA2fZrgNxQ"
+  "feedback": {
+    "daXong": true,
+    "mucHaiLong": 5,
+    "khen": [
+      "dung_hen",
+      "thai_do",
+      "chat_luong"
+    ],
+    "yKien": "Thợ làm nhanh, dọn sạch. Cảm ơn ban quản lý.",
+    "nguoiDanhGia": "Chị Trang",
+    "luc": "2026-09-23T16:46:12.610Z",
+    "jti": "3a79c9c7a6055731"
+  },
+  "dongLuc": "2026-09-23T16:46:12.610Z"
 }
