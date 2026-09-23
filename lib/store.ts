@@ -84,6 +84,12 @@ function ghHeaders(coBody = false): Record<string, string> {
   };
 }
 
+/** 403 của GitHub nghĩa là token thiếu quyền - nói thẳng cần bật gì, đừng bắt đoán. */
+const THIEU_QUYEN =
+  'GITHUB_TOKEN chưa có quyền ghi. Vào GitHub → Settings → Developer settings → ' +
+  'Personal access tokens → Fine-grained tokens → chọn token này → Repository access: ' +
+  `${OWNER}/${REPO} → Permissions → Contents: Read and write → Save.`;
+
 let branchReady = false;
 
 /** Tạo nhánh dữ liệu nếu chưa có (tách khỏi nhánh code để không deploy lại). */
@@ -112,6 +118,7 @@ async function ensureBranch(): Promise<void> {
     body: JSON.stringify({ ref: `refs/heads/${BRANCH}`, sha }),
   });
   if (!created.ok && created.status !== 422) {
+    if (created.status === 403) throw new Error(THIEU_QUYEN);
     const chiTiet = await created.text().catch(() => '');
     throw new Error(`Không tạo được nhánh ${BRANCH} (${created.status}): ${chiTiet.slice(0, 200)}`);
   }
@@ -146,6 +153,7 @@ async function ghWrite(file: string, body: string, message: string): Promise<voi
     }),
   });
   if (!res.ok) {
+    if (res.status === 403) throw new Error(THIEU_QUYEN);
     const chiTiet = await res.text().catch(() => '');
     throw new Error(`Ghi ${file} lỗi ${res.status}: ${chiTiet.slice(0, 200)}`);
   }
