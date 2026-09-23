@@ -86,8 +86,8 @@ export default async function Thuong() {
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Cách xếp mức</h2>
         <ul className="muted" style={{ paddingLeft: 18, margin: 0 }}>
-          <li>Điểm của một việc = trung bình 4 tiêu chí khách chấm (đúng hẹn, thái độ, chất lượng, vệ sinh).</li>
-          <li>Mức A từ 4,75 · Mức B từ 4,25 · Mức C từ 3,5 · dưới 3,5 thì BQL xem lại.</li>
+          <li>Điểm của một việc = mức hài lòng khách chọn trên hàng mặt cười (1 Tệ → 5 Rất tốt).</li>
+          <li>Mức A từ 4,5 · Mức B từ 3,5 · Mức C từ 2,5 · dưới 2,5 thì BQL xem lại.</li>
           <li>Khách bấm <strong>chưa xong</strong> thì việc đó không xét thưởng, dù chấm mấy sao.</li>
           {!coTien && <li>Số tiền mỗi mức: sếp chốt rồi điền vào <code>BONUS_VND</code> trong <code>lib/wo.ts</code>, bảng này tự hiện thành tiền.</li>}
         </ul>
