@@ -1,0 +1,332 @@
+<title>Bảo trì Ny'ah Phú Định</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --bg:#FDFBF7; --surface:#FFFFFF; --surface-2:#F6F1E9;
+    --ink:#1A140F; --ink-2:#584C43; --ink-3:#8A7B70;
+    --line:#E7DED1; --line-strong:#D6C8B6;
+    --accent:#802613;
+    --ontime:#00897B; --late:#C9481F;
+    --good:#00897B; --warn:#9A6B10; --crit:#C9481F;
+    --chip-good-bg:#E3F2EF; --chip-warn-bg:#F8EEDA; --chip-crit-bg:#FBE8E1;
+    --shadow: 0 1px 2px rgba(26,20,15,.05);
+    --r:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --bg:#101218; --surface:#191C24; --surface-2:#21252F;
+      --ink:#F6F2EB; --ink-2:#BDB5AA; --ink-3:#8B8379;
+      --line:#2B303B; --line-strong:#3A4150;
+      --accent:#E2A08B;
+      --ontime:#26A69A; --late:#E2703A;
+      --good:#26A69A; --warn:#D9A441; --crit:#E2703A;
+      --chip-good-bg:#16302E; --chip-warn-bg:#332914; --chip-crit-bg:#3A2118;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#101218; --surface:#191C24; --surface-2:#21252F;
+    --ink:#F6F2EB; --ink-2:#BDB5AA; --ink-3:#8B8379;
+    --line:#2B303B; --line-strong:#3A4150;
+    --accent:#E2A08B;
+    --ontime:#26A69A; --late:#E2703A;
+    --good:#26A69A; --warn:#D9A441; --crit:#E2703A;
+    --chip-good-bg:#16302E; --chip-warn-bg:#332914; --chip-crit-bg:#3A2118;
+    --shadow: none;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+    font-weight:400; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding-inline:16px; padding-block:24px 56px;}
+  h1,h2,h3,.num{font-family:"Outfit", "Be Vietnam Pro", system-ui, sans-serif; letter-spacing:-.02em; text-wrap:balance;}
+
+  /* header */
+  .top{display:flex; flex-wrap:wrap; gap:12px 20px; align-items:flex-end; justify-content:space-between; padding-bottom:18px; border-bottom:1px solid var(--line);}
+  .brand{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+  h1{font-size:clamp(1.35rem,3vw,1.75rem); font-weight:600; margin:0;}
+  .sub{color:var(--ink-2); font-size:.875rem; margin:4px 0 0}
+  .demo{display:inline-flex; align-items:center; gap:6px; font-size:.75rem; font-weight:500;
+    color:var(--accent); background:var(--surface-2); border:1px dashed var(--line-strong);
+    border-radius:999px; padding:4px 11px; letter-spacing:.01em}
+  .range{display:flex; gap:0; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:var(--surface)}
+  .range button{appearance:none; border:0; background:transparent; color:var(--ink-2);
+    font:500 .8125rem/1 "Be Vietnam Pro",sans-serif; padding:9px 14px; cursor:pointer}
+  .range button[aria-pressed="true"]{background:var(--accent); color:#fff}
+  .range button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+
+  /* stat row */
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; margin-top:22px}
+  .stat{background:var(--surface); padding:16px 18px; display:flex; flex-direction:column; gap:3px; min-width:0}
+  .stat .k{font-size:.75rem; color:var(--ink-3); font-weight:500; letter-spacing:.02em; text-transform:uppercase}
+  .num{font-size:1.9rem; font-weight:600; line-height:1.1; font-variant-numeric:tabular-nums}
+  .stat .f{font-size:.8125rem; color:var(--ink-2)}
+  .stat.alert .num{color:var(--crit)}
+  .stat.alert{border-left:3px solid var(--crit)}
+
+  /* grid */
+  .grid{display:grid; grid-template-columns:1.35fr 1fr; gap:18px; margin-top:18px; align-items:start}
+  @media (max-width:860px){ .grid{grid-template-columns:1fr} }
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px; box-shadow:var(--shadow); min-width:0}
+  .card h2{font-size:1rem; font-weight:600; margin:0}
+  .card .hint{font-size:.8125rem; color:var(--ink-3); margin:3px 0 14px}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:.8125rem; color:var(--ink-2); margin-bottom:10px}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .sw{width:11px; height:11px; border-radius:3px; display:inline-block}
+
+  /* chart */
+  .chartbox{position:relative; overflow-x:auto}
+  svg{display:block; width:100%; height:auto}
+  .tip{position:absolute; pointer-events:none; opacity:0; transition:opacity .12s;
+    background:var(--ink); color:var(--bg); font-size:.78rem; line-height:1.4; padding:7px 10px;
+    border-radius:8px; white-space:nowrap; z-index:5; transform:translate(-50%,-115%)}
+  .tip b{font-weight:600}
+
+  /* table */
+  table{width:100%; border-collapse:collapse; font-size:.875rem}
+  th{text-align:left; font-weight:500; color:var(--ink-3); font-size:.75rem; text-transform:uppercase;
+     letter-spacing:.02em; padding:0 8px 8px 0; border-bottom:1px solid var(--line)}
+  td{padding:11px 8px 11px 0; border-bottom:1px solid var(--line); vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  .rt{text-align:right; font-variant-numeric:tabular-nums}
+  .bar{height:6px; border-radius:3px; background:var(--surface-2); overflow:hidden; margin-top:5px}
+  .bar i{display:block; height:100%; border-radius:3px; background:var(--ontime)}
+  .bar i.low{background:var(--late)}
+
+  /* unit map */
+  .units{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:5px; margin-top:4px}
+  @media (max-width:520px){ .units{grid-template-columns:repeat(5,minmax(0,1fr))} }
+  .u{aspect-ratio:1; border-radius:7px; border:1px solid var(--line-strong); background:var(--surface-2);
+     display:flex; align-items:center; justify-content:center; font-size:.7rem; color:var(--ink-3);
+     font-variant-numeric:tabular-nums; position:relative}
+  .u.work{border-color:var(--ontime); border-width:2px; color:var(--ink); font-weight:500}
+  .u.over{background:var(--late); border-color:var(--late); color:#fff; font-weight:600}
+  .u.over::after{content:"!"; position:absolute; top:-5px; right:-3px; font-size:.65rem; font-weight:700;
+     background:var(--crit); color:#fff; width:14px; height:14px; border-radius:50%;
+     display:flex; align-items:center; justify-content:center; border:1.5px solid var(--surface)}
+
+  /* feedback list */
+  .fb{display:flex; flex-direction:column; gap:0}
+  .fb li{list-style:none; padding:13px 0; border-bottom:1px solid var(--line); display:flex; gap:12px}
+  .fb li:last-child{border-bottom:0}
+  .fb .who{font-weight:500; font-size:.875rem}
+  .fb .meta{font-size:.75rem; color:var(--ink-3); margin-top:1px}
+  .fb .txt{font-size:.8125rem; color:var(--ink-2); margin-top:6px}
+  .score{flex:0 0 auto; width:44px; height:44px; border-radius:11px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; font-family:"Outfit",sans-serif; font-weight:600; font-size:1.05rem;
+    background:var(--chip-good-bg); color:var(--good)}
+  .score.bad{background:var(--chip-crit-bg); color:var(--crit)}
+  .score em{font-style:normal; font-size:.55rem; font-weight:500; letter-spacing:.04em}
+  .chip{display:inline-flex; align-items:center; gap:5px; font-size:.7rem; font-weight:500; padding:2px 8px;
+    border-radius:999px; background:var(--chip-crit-bg); color:var(--crit); margin-left:6px}
+
+  footer{margin-top:26px; padding-top:16px; border-top:1px solid var(--line); font-size:.8125rem; color:var(--ink-3)}
+  footer code{font-size:.78rem; background:var(--surface-2); padding:1px 6px; border-radius:5px; color:var(--ink-2)}
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="brand">
+        <h1>Bảo trì Ny'ah Phú Định</h1>
+        <span class="demo">Dữ liệu mẫu — không phải số liệu thật</span>
+      </div>
+      <p class="sub">50 căn · Bản mẫu giao diện cho tài liệu <strong>docs/05_KIEN_TRUC.md §9</strong></p>
+    </div>
+    <div class="range" role="group" aria-label="Khoảng thời gian">
+      <button type="button" id="r8" aria-pressed="true">8 tuần</button>
+      <button type="button" id="r12" aria-pressed="false">12 tuần</button>
+    </div>
+  </header>
+
+  <section class="stats" aria-label="Chỉ số tổng quan">
+    <div class="stat"><span class="k">Đang mở</span><span class="num" id="s-open">7</span><span class="f">3 chờ nghiệm thu</span></div>
+    <div class="stat alert"><span class="k">Quá hạn</span><span class="num" id="s-over">2</span><span class="f">căn 27, căn 43</span></div>
+    <div class="stat"><span class="k">Đúng SLA</span><span class="num" id="s-sla">88%</span><span class="f">mục tiêu ≥ 85%</span></div>
+    <div class="stat"><span class="k">CSAT</span><span class="num" id="s-csat">4,4</span><span class="f">trên 5 · 41 lượt</span></div>
+    <div class="stat"><span class="k">Mở lại</span><span class="num" id="s-rework">6%</span><span class="f">3 việc / 14 ngày</span></div>
+  </section>
+
+  <div class="grid">
+    <div style="display:flex; flex-direction:column; gap:18px; min-width:0">
+      <section class="card">
+        <h2>Việc hoàn thành theo tuần</h2>
+        <p class="hint">Cột xếp chồng: phần dưới là việc đóng đúng hạn, phần trên là việc trễ SLA.</p>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--ontime)"></i>Đúng hạn</span>
+          <span><i class="sw" style="background:var(--late)"></i>Trễ SLA</span>
+        </div>
+        <div class="chartbox">
+          <svg id="chart" viewBox="0 0 720 260" role="img" aria-label="Biểu đồ cột việc hoàn thành theo tuần"></svg>
+          <div class="tip" id="tip"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Đội thợ</h2>
+        <p class="hint">Xếp theo mức hài lòng. Cột "chưa xong" là số lần cư dân bấm <em>Chưa xong</em> khi nghiệm thu.</p>
+        <table>
+          <thead><tr><th>Thợ</th><th>Chuyên môn</th><th class="rt">Việc</th><th class="rt">CSAT</th><th class="rt">Chưa xong</th></tr></thead>
+          <tbody id="tech"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:18px; min-width:0">
+      <section class="card">
+        <h2>Sơ đồ 50 căn</h2>
+        <p class="hint">Trạng thái việc bảo trì đang mở tại từng lô.</p>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--surface-2); border:1px solid var(--line-strong)"></i>Không có việc</span>
+          <span><i class="sw" style="background:transparent; border:2px solid var(--ontime)"></i>Đang xử lý</span>
+          <span><i class="sw" style="background:var(--late)"></i>Quá hạn</span>
+        </div>
+        <div class="units" id="units"></div>
+      </section>
+
+      <section class="card">
+        <h2>Nhận xét mới</h2>
+        <p class="hint">Đánh giá thấp và "chưa xong" luôn nằm trên đầu — đó là việc cần xử lý.</p>
+        <ul class="fb" id="fb"></ul>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    Bản mẫu tĩnh. Khi làm thật, mỗi con số đọc từ một view SQL
+    (<code>v_wo_sla</code>, <code>v_csat_by_tech</code>, <code>v_rework</code>) và mỗi thẻ bấm được
+    để nhảy sang danh sách WO tương ứng.
+  </footer>
+</div>
+
+<script>
+(function(){
+  var DATA = {
+    8:  [["T31",6,1],["T32",9,0],["T33",7,2],["T34",11,1],["T35",8,3],["T36",12,1],["T37",10,1],["T38",9,2]],
+    12: [["T27",5,2],["T28",8,1],["T29",6,1],["T30",9,2],["T31",6,1],["T32",9,0],["T33",7,2],["T34",11,1],["T35",8,3],["T36",12,1],["T37",10,1],["T38",9,2]]
+  };
+  var SUM = {
+    8:  {open:7, over:2, sla:"88%", csat:"4,4", rework:"6%", n:"41 lượt"},
+    12: {open:7, over:2, sla:"85%", csat:"4,3", rework:"8%", n:"63 lượt"}
+  };
+  var TECH = [
+    ["Anh Hùng","Điện",24,4.7,0],
+    ["Anh Tuấn","Cấp thoát nước",19,4.5,1],
+    ["Anh Nam","Điều hòa / ME",15,4.1,2],
+    ["Anh Khoa","Hoàn thiện",11,3.8,3]
+  ];
+  var FB = [
+    [2,"Anh Dũng — căn 27","WO-2609-031 · Cấp thoát nước · hôm nay","Vẫn còn rỉ nước ở chân bồn, phải gọi lại lần hai.",true],
+    [5,"Chị Trang — căn 10","WO-2609-014 · Cấp thoát nước · hôm nay","Thợ đến đúng hẹn, bọc giày, làm xong dọn sạch sẽ.",false],
+    [4,"Anh Phát — căn 33","WO-2609-029 · Điện · hôm qua","Xử lý nhanh, chỉ là hẹn lại một lần do chờ vật tư.",false],
+    [5,"Cô Liên — căn 8","WO-2609-026 · Hoàn thiện · 21/09","Sơn lại mảng tường rất gọn, không dây bẩn.",false]
+  ];
+  var WORK = [10,33,8,19], OVER = [27,43];
+
+  var tip = document.getElementById("tip"), svg = document.getElementById("chart");
+
+  function drawChart(rows){
+    var W=720, H=260, ml=38, mr=12, mt=14, mb=34;
+    var iw = W-ml-mr, ih = H-mt-mb;
+    var max = 0;
+    rows.forEach(function(r){ max = Math.max(max, r[1]+r[2]); });
+    var top = Math.ceil(max/4)*4 || 4;
+    var y = function(v){ return mt + ih - (v/top)*ih; };
+    var step = iw/rows.length, bw = Math.min(42, step*0.56);
+    var s = "";
+
+    for(var g=0; g<=4; g++){
+      var gv = top*g/4, gy = y(gv);
+      s += '<line x1="'+ml+'" y1="'+gy+'" x2="'+(W-mr)+'" y2="'+gy+'" stroke="var(--line)" stroke-width="1"/>';
+      s += '<text x="'+(ml-9)+'" y="'+(gy+4)+'" text-anchor="end" font-size="11" fill="var(--ink-3)" font-family="Be Vietnam Pro, sans-serif">'+gv+'</text>';
+    }
+
+    rows.forEach(function(r,i){
+      var cx = ml + step*i + step/2, x = cx - bw/2;
+      var ok = r[1], late = r[2], tot = ok+late;
+      var hOk = (ok/top)*ih, hLate = (late/top)*ih;
+      var yOk = y(ok);
+      s += '<rect x="'+x+'" y="'+yOk+'" width="'+bw+'" height="'+Math.max(hOk,0)+'" rx="4" fill="var(--ontime)"/>';
+      if(late>0){
+        var yLate = y(tot);
+        s += '<rect x="'+x+'" y="'+yLate+'" width="'+bw+'" height="'+Math.max(hLate-2,1)+'" rx="4" fill="var(--late)"/>';
+      }
+      s += '<text x="'+cx+'" y="'+(y(tot)-7)+'" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--ink-2)" font-family="Outfit, sans-serif">'+tot+'</text>';
+      s += '<text x="'+cx+'" y="'+(H-12)+'" text-anchor="middle" font-size="11" fill="var(--ink-3)" font-family="Be Vietnam Pro, sans-serif">'+r[0]+'</text>';
+      s += '<rect class="hit" data-i="'+i+'" x="'+(cx-step/2)+'" y="'+mt+'" width="'+step+'" height="'+ih+'" fill="transparent"/>';
+    });
+
+    s += '<line x1="'+ml+'" y1="'+(mt+ih)+'" x2="'+(W-mr)+'" y2="'+(mt+ih)+'" stroke="var(--line-strong)" stroke-width="1"/>';
+    svg.innerHTML = s;
+
+    Array.prototype.forEach.call(svg.querySelectorAll(".hit"), function(h){
+      h.addEventListener("mouseenter", function(e){
+        var r = rows[+h.dataset.i], box = svg.getBoundingClientRect(), hb = h.getBoundingClientRect();
+        tip.innerHTML = "<b>Tuần "+r[0]+"</b><br>Đúng hạn: "+r[1]+" · Trễ: "+r[2];
+        tip.style.left = (hb.left - box.left + hb.width/2) + "px";
+        tip.style.top = (hb.top - box.top + 26) + "px";
+        tip.style.opacity = 1;
+      });
+      h.addEventListener("mouseleave", function(){ tip.style.opacity = 0; });
+    });
+  }
+
+  function fillSummary(k){
+    var s = SUM[k];
+    document.getElementById("s-open").textContent = s.open;
+    document.getElementById("s-over").textContent = s.over;
+    document.getElementById("s-sla").textContent = s.sla;
+    document.getElementById("s-csat").textContent = s.csat;
+    document.getElementById("s-rework").textContent = s.rework;
+    document.querySelector("#s-csat + .f").textContent = "trên 5 · " + s.n;
+  }
+
+  var tb = document.getElementById("tech");
+  TECH.forEach(function(t){
+    var pct = Math.round((t[3]/5)*100), low = t[3] < 4.2;
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td>'+t[0]+'</td><td style="color:var(--ink-2)">'+t[1]+'</td>'+
+      '<td class="rt">'+t[2]+'</td>'+
+      '<td class="rt" style="min-width:76px">'+t[3].toFixed(1).replace(".",",")+
+        '<span class="bar"><i class="'+(low?"low":"")+'" style="width:'+pct+'%"></i></span></td>'+
+      '<td class="rt">'+(t[4]>0 ? t[4]+' <span class="chip">cần xem</span>' : '0')+'</td>';
+    tb.appendChild(tr);
+  });
+
+  var um = document.getElementById("units");
+  for(var n=1; n<=50; n++){
+    var d = document.createElement("div");
+    d.className = "u" + (OVER.indexOf(n)>-1 ? " over" : (WORK.indexOf(n)>-1 ? " work" : ""));
+    d.textContent = n;
+    d.title = "Căn " + n + (OVER.indexOf(n)>-1 ? " — có việc quá hạn" : (WORK.indexOf(n)>-1 ? " — đang xử lý" : " — không có việc mở"));
+    um.appendChild(d);
+  }
+
+  var fl = document.getElementById("fb");
+  FB.forEach(function(f){
+    var li = document.createElement("li");
+    li.innerHTML = '<div class="score'+(f[4]?" bad":"")+'">'+f[0]+'<em>SAO</em></div>'+
+      '<div style="min-width:0"><div class="who">'+f[1]+
+        (f[4]?'<span class="chip">chưa xong</span>':'')+'</div>'+
+      '<div class="meta">'+f[2]+'</div><div class="txt">'+f[3]+'</div></div>';
+    fl.appendChild(li);
+  });
+
+  var b8 = document.getElementById("r8"), b12 = document.getElementById("r12");
+  function pick(k){
+    b8.setAttribute("aria-pressed", k===8 ? "true":"false");
+    b12.setAttribute("aria-pressed", k===12 ? "true":"false");
+    drawChart(DATA[k]); fillSummary(k);
+  }
+  b8.addEventListener("click", function(){ pick(8); });
+  b12.addEventListener("click", function(){ pick(12); });
+  pick(8);
+})();
+</script>
