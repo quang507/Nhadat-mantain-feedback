@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { daDangNhap } from '@/lib/auth';
+import { COOKIE, aiDangDangNhap, daDangNhap } from '@/lib/auth';
 import { chayTam, danhSachWo, layInbox, layWo, luuWo } from '@/lib/store';
 import { STATUS_LABEL, type WorkOrder } from '@/lib/types';
 import { createToken } from '@/lib/token';
@@ -74,8 +74,16 @@ function Dong({ wo }: { wo: WorkOrder }) {
   );
 }
 
+async function thoat() {
+  'use server';
+  const { cookies } = await import('next/headers');
+  cookies().delete(COOKIE);
+  redirect('/login');
+}
+
 export default async function Admin() {
   if (!daDangNhap()) redirect('/login');
+  const ai = aiDangDangNhap();
 
   const tatCa = await danhSachWo();
   const inbox = await layInbox();
@@ -105,11 +113,15 @@ export default async function Admin() {
           <h1>Việc bảo trì</h1>
           <p className="muted">
             {mo.length} việc đang mở{diemTB !== null ? ` · điểm trung bình ${diemTB}/5` : ''}
+            {ai && ai !== 'BQL' ? ` · ${ai}` : ''}
           </p>
         </div>
         <div className="btn-row" style={{ marginTop: 0 }}>
           <Link className="btn" href="/admin/new">+ Việc mới</Link>
           <Link className="btn btn-ghost" href="/admin/thuong">Thưởng thợ</Link>
+          <form action={thoat}>
+            <button type="submit" className="btn-ghost" style={{ padding: '12px 14px' }}>Thoát</button>
+          </form>
         </div>
       </div>
 

@@ -13,21 +13,34 @@ function secret(): string {
   return s;
 }
 
-export function taoPhien(): string {
+/** Phiên ghi luôn ai đang đăng nhập, để trang quản trị biết mà hiện tên. */
+export function taoPhien(ai = 'BQL'): string {
   const exp = Date.now() + HAN_NGAY * 86_400_000;
-  const sig = createHmac('sha256', secret()).update(`admin:${exp}`).digest('hex');
-  return `${exp}.${sig}`;
+  const nguoi = Buffer.from(ai).toString('base64url');
+  const sig = createHmac('sha256', secret()).update(`${nguoi}:${exp}`).digest('hex');
+  return `${nguoi}.${exp}.${sig}`;
+}
+
+export function docPhien(value: string | undefined): { ai: string } | null {
+  if (!value) return null;
+  const phan = value.split('.');
+  if (phan.length !== 3) return null;
+  const [nguoi, expRaw, sig] = phan;
+  const exp = Number(expRaw);
+  if (!Number.isFinite(exp) || exp < Date.now() || !sig) return null;
+  const mong = createHmac('sha256', secret()).update(`${nguoi}:${exp}`).digest('hex');
+  const a = Buffer.from(sig);
+  const b = Buffer.from(mong);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+  try {
+    return { ai: Buffer.from(nguoi, 'base64url').toString('utf8') };
+  } catch {
+    return null;
+  }
 }
 
 export function phienHopLe(value: string | undefined): boolean {
-  if (!value) return false;
-  const [expRaw, sig] = value.split('.');
-  const exp = Number(expRaw);
-  if (!Number.isFinite(exp) || exp < Date.now() || !sig) return false;
-  const expected = createHmac('sha256', secret()).update(`admin:${exp}`).digest('hex');
-  const a = Buffer.from(sig);
-  const b = Buffer.from(expected);
-  return a.length === b.length && timingSafeEqual(a, b);
+  return docPhien(value) !== null;
 }
 
 /** Kiểm tra mật khẩu nhập vào, so sánh kiểu không lộ thời gian. */
@@ -41,4 +54,19 @@ export function dungMatKhau(nhap: string): boolean {
 
 export function daDangNhap(): boolean {
   return phienHopLe(cookies().get(COOKIE)?.value);
+}
+
+/** Tên/email người đang đăng nhập, để hiện ở góc trang quản trị. */
+export function aiDangDangNhap(): string | null {
+  return docPhien(cookies().get(COOKIE)?.value)?.ai ?? null;
+}
+
+export function optionsCookie() {
+  return {
+    httpOnly: true,
+    sameSite: 'lax' as const,
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: HAN_NGAY * 86_400,
+  };
 }
