@@ -98,6 +98,7 @@ có tranh chấp bảo hành.
 | [docs/03_QUY_TRINH_DU_LIEU.md](docs/03_QUY_TRINH_DU_LIEU.md) | Quy trình, SLA, mô hình dữ liệu, spec QR |
 | [docs/04_USER_STORIES_ROADMAP.md](docs/04_USER_STORIES_ROADMAP.md) | User story, KPI, roadmap, rủi ro |
 | [docs/05_KIEN_TRUC.md](docs/05_KIEN_TRUC.md) | Kiến trúc kỹ thuật |
+| [docs/06_HUONG_DAN_VAN_HANH.md](docs/06_HUONG_DAN_VAN_HANH.md) | **Hướng dẫn cho BQL**: khách nhận mẫu đánh giá bằng cách nào, một việc đi từ đầu tới cuối |
 | `docs/prototype/dashboard.html` | Bản mẫu dashboard nhiều số liệu (để dành cho sau, khi đã đủ dữ liệu) |
 
 ## Chưa có trong đợt này
