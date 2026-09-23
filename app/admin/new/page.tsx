@@ -35,7 +35,13 @@ export default function TaoViec({
     const hangMuc = hangMucChon || doanHangMuc(moTa);
     const kenh = (String(formData.get('kenh') || '') || (zaloUserId ? 'zalo' : 'hotline')) as Channel;
 
-    const ids = (await danhSachWo()).map((w) => w.id);
+    // Kho dữ liệu hỏng thì báo hẳn ra màn hình, đừng để Next văng "Application error".
+    let ids: string[];
+    try {
+      ids = (await danhSachWo()).map((w) => w.id);
+    } catch (err) {
+      redirect(`/admin/new?loi=${encodeURIComponent(String(err instanceof Error ? err.message : err).slice(0, 200))}`);
+    }
     const now = new Date().toISOString();
 
     // Điền sẵn tên thợ thì việc vào luôn trạng thái đang xử lý - bớt cho BQL một lần bấm.
@@ -57,12 +63,16 @@ export default function TaoViec({
       ],
     };
 
-    await luuWo(wo, 'tạo việc mới');
+    try {
+      await luuWo(wo, 'tạo việc mới');
 
-    if (zaloUserId) {
-      const { luuInbox } = await import('@/lib/store');
-      const inbox = await layInbox();
-      await luuInbox(inbox.map((i) => (i.zaloUserId === zaloUserId && !i.daXuLy ? { ...i, daXuLy: true } : i)));
+      if (zaloUserId) {
+        const { luuInbox } = await import('@/lib/store');
+        const inbox = await layInbox();
+        await luuInbox(inbox.map((i) => (i.zaloUserId === zaloUserId && !i.daXuLy ? { ...i, daXuLy: true } : i)));
+      }
+    } catch (err) {
+      redirect(`/admin/new?loi=${encodeURIComponent(String(err instanceof Error ? err.message : err).slice(0, 200))}`);
     }
 
     await baoBQL(`Việc mới ${wo.id} — căn ${wo.unitId} — ${wo.hangMuc}\n${wo.moTa}`);
@@ -77,7 +87,13 @@ export default function TaoViec({
       </div>
 
       <form action={tao} className="card pad-lg">
-        {searchParams.loi ? <p className="err">Cần có căn, tên khách và nội dung khách báo.</p> : null}
+        {searchParams.loi ? (
+          <p className="err">
+            {searchParams.loi === '1'
+              ? 'Cần có căn, tên khách và nội dung khách báo.'
+              : `Chưa lưu được việc: ${searchParams.loi}`}
+          </p>
+        ) : null}
 
         <label htmlFor="unitId">Căn số</label>
         <select id="unitId" name="unitId" required defaultValue="">
