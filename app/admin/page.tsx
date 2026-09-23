@@ -37,9 +37,12 @@ export default async function Admin() {
   const choDanhGia = mo.filter((w) => w.trangThai === 'cho_danh_gia').length;
   const chuaXuLy = inbox.filter((i) => !i.daXuLy);
 
-  const daCham = tatCa.filter((w) => w.feedback);
-  const diemTB = daCham.length
-    ? Math.round((daCham.reduce((s, w) => s + diemTrungBinh(w.feedback!.ratings), 0) / daCham.length) * 100) / 100
+  // Việc khách báo "chưa xong" không có điểm, nên chỉ lấy trung bình trên việc đã chấm.
+  const coDiem = tatCa
+    .map((w) => (w.feedback ? diemTrungBinh(w.feedback.ratings) : null))
+    .filter((d): d is number => d !== null);
+  const diemTB = coDiem.length
+    ? Math.round((coDiem.reduce((a, b) => a + b, 0) / coDiem.length) * 100) / 100
     : null;
 
   return (

@@ -1,6 +1,5 @@
 import { layWo } from '@/lib/store';
 import { readToken } from '@/lib/token';
-import { getUnit } from '@/lib/units';
 import FormDanhGia from './form';
 
 export const dynamic = 'force-dynamic';
@@ -41,18 +40,14 @@ export default async function TrangDanhGia({ params }: { params: { token: string
     return <Thong tieuDe="Công việc chưa tới bước đánh giá" noiDung="Anh/chị vui lòng liên hệ Ban quản lý." />;
   }
 
-  const unit = getUnit(wo.unitId);
-
   return (
     <FormDanhGia
       token={params.token}
       woId={wo.id}
       unitId={wo.unitId}
-      model={unit?.model ?? ''}
       hangMuc={wo.hangMuc}
       moTa={wo.moTa}
       tho={wo.tho}
-      khach={wo.khach}
     />
   );
 }

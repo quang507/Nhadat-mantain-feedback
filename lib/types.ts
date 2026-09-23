@@ -44,12 +44,20 @@ export const CRITERIA = [
 
 export type CriteriaKey = (typeof CRITERIA)[number]['key'];
 
-export type Ratings = Record<CriteriaKey, number>; // mỗi tiêu chí 1..5
+export type Ratings = Partial<Record<CriteriaKey, number>>; // mỗi tiêu chí 1..5
+
+/** Lời nhắn bằng giọng nói của khách - file nằm riêng, đây chỉ là mô tả. */
+export interface VoiceNote {
+  duoi: string;   // 'webm' | 'mp4' | 'ogg' - iPhone và Android ghi ra định dạng khác nhau
+  mime: string;
+  giay: number;   // độ dài, để BQL biết trước khi bấm nghe
+}
 
 export interface Feedback {
   daXong: boolean;          // "việc đã xong chưa" - câu quan trọng nhất
-  ratings: Ratings;
+  ratings: Ratings;         // khách bấm "chưa xong" thì bỏ trống, không bắt chấm sao
   yKien: string;
+  voice?: VoiceNote;
   nguoiDanhGia: string;     // tên người nhận xét, vd "Chị Trang"
   luc: string;              // ISO time
   jti: string;              // id của token đã dùng -> mỗi link chỉ gửi được một lần

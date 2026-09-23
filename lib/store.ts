@@ -101,11 +101,17 @@ async function ensureBranch(): Promise<void> {
 }
 
 async function ghRead(file: string): Promise<{ body: string; sha: string } | null> {
+  const raw = await ghReadRaw(file);
+  return raw ? { body: raw.buf.toString('utf8'), sha: raw.sha } : null;
+}
+
+/** Đọc nguyên byte - dùng cho file âm thanh, đừng ép về utf8. */
+async function ghReadRaw(file: string): Promise<{ buf: Buffer; sha: string } | null> {
   const res = await fetch(`${API}/contents/${file}?ref=${BRANCH}`, { headers: ghHeaders(), cache: 'no-store' });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Đọc ${file} lỗi: ${res.status}`);
   const json = await res.json();
-  return { body: Buffer.from(json.content, 'base64').toString('utf8'), sha: json.sha };
+  return { buf: Buffer.from(json.content, 'base64'), sha: json.sha };
 }
 
 async function ghWrite(file: string, body: string, message: string): Promise<void> {
@@ -161,6 +167,52 @@ export async function danhSachWo(): Promise<WorkOrder[]> {
   return all
     .filter((w): w is WorkOrder => w !== null)
     .sort((a, b) => b.taoLuc.localeCompare(a.taoLuc));
+}
+
+/* ---- lời nhắn bằng giọng nói: file nhị phân, để riêng khỏi JSON của việc ---- */
+
+function duongDanVoice(woId: string, duoi: string): string {
+  return `voice/${woId}.${duoi}`;
+}
+
+export async function luuVoice(woId: string, duoi: string, data: Buffer): Promise<void> {
+  const file = duongDanVoice(woId, duoi);
+  if (dungGithub()) {
+    await ensureBranch();
+    const cur = await ghRead(file);
+    const res = await fetch(`${API}/contents/${file}`, {
+      method: 'PUT',
+      headers: ghHeaders(),
+      body: JSON.stringify({
+        message: `${woId}: lời nhắn bằng giọng nói của khách`,
+        content: data.toString('base64'),
+        branch: BRANCH,
+        ...(cur ? { sha: cur.sha } : {}),
+      }),
+    });
+    if (!res.ok) throw new Error(`Ghi ${file} lỗi: ${res.status}`);
+    return;
+  }
+  const fs = await import('fs/promises');
+  const path = await import('path');
+  const full = path.join(await localDir(), file);
+  await fs.mkdir(path.dirname(full), { recursive: true });
+  await fs.writeFile(full, data);
+}
+
+export async function docVoice(woId: string, duoi: string): Promise<Buffer | null> {
+  const file = duongDanVoice(woId, duoi);
+  if (dungGithub()) {
+    const cur = await ghReadRaw(file);
+    return cur ? cur.buf : null;
+  }
+  const fs = await import('fs/promises');
+  const path = await import('path');
+  try {
+    return await fs.readFile(path.join(await localDir(), file));
+  } catch {
+    return null;
+  }
 }
 
 export async function layInbox(): Promise<ZaloInboxItem[]> {

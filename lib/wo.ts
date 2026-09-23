@@ -14,9 +14,13 @@ export function nextWoId(existingIds: string[], now = new Date()): string {
   return `${prefix}${String(max + 1).padStart(3, '0')}`;
 }
 
-/** Điểm chung = trung bình 4 tiêu chí, làm tròn 2 số. */
-export function diemTrungBinh(r: Ratings): number {
-  const vals = CRITERIA.map((c) => r[c.key]);
+/**
+ * Điểm chung = trung bình các tiêu chí khách đã chấm, làm tròn 2 số.
+ * Khách bấm "chưa xong" thì không chấm sao -> không có điểm, trả về null.
+ */
+export function diemTrungBinh(r: Ratings): number | null {
+  const vals = CRITERIA.map((c) => r[c.key]).filter((v): v is number => typeof v === 'number');
+  if (vals.length === 0) return null;
   const sum = vals.reduce((a, b) => a + b, 0);
   return Math.round((sum / vals.length) * 100) / 100;
 }
@@ -37,9 +41,11 @@ export interface KetQuaThuong {
  */
 export function xepThuong(fb?: Feedback): KetQuaThuong {
   if (!fb) return { muc: 'khong', nhan: 'Chưa có đánh giá', diem: null };
-  if (!fb.daXong) return { muc: 'khong', nhan: 'Khách báo chưa xong — không xét thưởng', diem: diemTrungBinh(fb.ratings) };
 
   const d = diemTrungBinh(fb.ratings);
+  if (!fb.daXong) return { muc: 'khong', nhan: 'Khách báo chưa xong — không xét thưởng', diem: d };
+  if (d === null) return { muc: 'khong', nhan: 'Khách chưa chấm điểm', diem: null };
+
   if (d >= 4.75) return { muc: 'A', nhan: 'Mức A — xuất sắc', diem: d };
   if (d >= 4.25) return { muc: 'B', nhan: 'Mức B — tốt', diem: d };
   if (d >= 3.5) return { muc: 'C', nhan: 'Mức C — đạt', diem: d };
@@ -47,10 +53,15 @@ export function xepThuong(fb?: Feedback): KetQuaThuong {
 }
 
 /**
- * Số tiền thưởng mỗi mức. ĐỂ TRỐNG (0) cho tới khi sếp chốt con số —
- * điền số ở đây thì trang tổng hợp tự hiện thành tiền.
+ * Số tiền thưởng mỗi mức (VNĐ), sếp chốt 23/09/2026: dải 100k–500k mỗi việc.
+ * Sửa số ở đây là bảng thưởng đổi theo, không phải sửa chỗ nào khác.
  */
-export const BONUS_VND: Record<MucThuong, number> = { A: 0, B: 0, C: 0, khong: 0 };
+export const BONUS_VND: Record<MucThuong, number> = {
+  A: 500_000,
+  B: 300_000,
+  C: 100_000,
+  khong: 0,
+};
 
 export function tienThuong(muc: MucThuong): number {
   return BONUS_VND[muc] ?? 0;

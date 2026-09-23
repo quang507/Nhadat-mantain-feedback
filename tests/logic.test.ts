@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeAll } from 'bun:test';
-import { nextWoId, diemTrungBinh, xepThuong, coTheChuyen } from '../lib/wo';
+import { nextWoId, diemTrungBinh, xepThuong, coTheChuyen, tienThuong } from '../lib/wo';
 import type { Feedback, Ratings } from '../lib/types';
 
 beforeAll(() => {
@@ -61,5 +61,31 @@ describe('chuyển trạng thái', () => {
     expect(coTheChuyen('moi', 'xong')).toBe(false);
     expect(coTheChuyen('dang_lam', 'xong')).toBe(false);
     expect(coTheChuyen('xong', 'dang_lam')).toBe(false);
+  });
+});
+
+describe('khách báo chưa xong', () => {
+  test('không chấm sao thì không có điểm, không xét thưởng', () => {
+    const fbChuaXong: Feedback = {
+      daXong: false, ratings: {}, yKien: 'Còn rỉ nước',
+      nguoiDanhGia: 'Chị Trang', luc: new Date().toISOString(), jti: 'y',
+    };
+    expect(diemTrungBinh(fbChuaXong.ratings)).toBeNull();
+    const kq = xepThuong(fbChuaXong);
+    expect(kq.muc).toBe('khong');
+    expect(kq.diem).toBeNull();
+  });
+
+  test('chấm thiếu mục thì tính trung bình trên các mục đã chấm', () => {
+    expect(diemTrungBinh({ dung_hen: 5, thai_do: 4 })).toBe(4.5);
+  });
+});
+
+describe('tiền thưởng', () => {
+  test('mỗi mức ra đúng số tiền sếp chốt', () => {
+    expect(tienThuong('A')).toBe(500_000);
+    expect(tienThuong('B')).toBe(300_000);
+    expect(tienThuong('C')).toBe(100_000);
+    expect(tienThuong('khong')).toBe(0);
   });
 });

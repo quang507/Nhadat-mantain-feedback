@@ -11,19 +11,26 @@ export default async function Thuong() {
 
   const daCham = (await danhSachWo()).filter((w) => w.feedback);
 
-  const theoTho = new Map<string, { viec: number; tongDiem: number; A: number; B: number; C: number; khong: number }>();
+  const theoTho = new Map<
+    string,
+    { viec: number; tongDiem: number; soCham: number; A: number; B: number; C: number; khong: number }
+  >();
   for (const w of daCham) {
     const ten = w.tho || '(chưa ghi tên thợ)';
-    const cur = theoTho.get(ten) || { viec: 0, tongDiem: 0, A: 0, B: 0, C: 0, khong: 0 };
+    const cur = theoTho.get(ten) || { viec: 0, tongDiem: 0, soCham: 0, A: 0, B: 0, C: 0, khong: 0 };
     cur.viec += 1;
-    cur.tongDiem += diemTrungBinh(w.feedback!.ratings);
+    const d = diemTrungBinh(w.feedback!.ratings);
+    if (d !== null) {
+      cur.tongDiem += d;
+      cur.soCham += 1;   // việc khách báo "chưa xong" không có điểm, không kéo trung bình xuống
+    }
     cur[xepThuong(w.feedback).muc] += 1;
     theoTho.set(ten, cur);
   }
 
   const rows = [...theoTho.entries()]
-    .map(([ten, v]) => ({ ten, ...v, tb: Math.round((v.tongDiem / v.viec) * 100) / 100 }))
-    .sort((a, b) => b.tb - a.tb);
+    .map(([ten, v]) => ({ ten, ...v, tb: v.soCham ? Math.round((v.tongDiem / v.soCham) * 100) / 100 : null }))
+    .sort((a, b) => (b.tb ?? -1) - (a.tb ?? -1));
 
   const coTien = tienThuong('A') + tienThuong('B') + tienThuong('C') > 0;
 
@@ -59,7 +66,7 @@ export default async function Thuong() {
                 <tr key={r.ten}>
                   <td>{r.ten}</td>
                   <td className="rt">{r.viec}</td>
-                  <td className="rt"><strong>{r.tb}</strong></td>
+                  <td className="rt"><strong>{r.tb ?? '—'}</strong></td>
                   <td className="rt">{r.A}</td>
                   <td className="rt">{r.B}</td>
                   <td className="rt">{r.C}</td>

@@ -7,7 +7,7 @@ import { layWo, luuWo } from '@/lib/store';
 import { createToken } from '@/lib/token';
 import { getUnit } from '@/lib/units';
 import { CHANNEL_LABEL, CRITERIA, STATUS_LABEL, type Status } from '@/lib/types';
-import { coTheChuyen, diemTrungBinh, xepThuong } from '@/lib/wo';
+import { coTheChuyen, diemTrungBinh, tienThuong, xepThuong } from '@/lib/wo';
 import { baoBQL, guiZaloOA } from '@/lib/notify';
 
 export const dynamic = 'force-dynamic';
@@ -37,6 +37,7 @@ export default async function ChiTiet({
 
   const unit = getUnit(wo.unitId);
   const thuong = xepThuong(wo.feedback);
+  const diem = wo.feedback ? diemTrungBinh(wo.feedback.ratings) : null;
 
   async function chuyen(formData: FormData) {
     'use server';
@@ -155,18 +156,33 @@ export default async function ChiTiet({
             {wo.feedback.nguoiDanhGia} · {gio(wo.feedback.luc)}
           </p>
           <dl className="kv">
-            {CRITERIA.map((c) => (
-              <div key={c.key} style={{ display: 'contents' }}>
-                <dt>{c.label}</dt>
-                <dd>{'★'.repeat(wo.feedback!.ratings[c.key])}{'☆'.repeat(5 - wo.feedback!.ratings[c.key])}</dd>
-              </div>
-            ))}
+            {CRITERIA.map((c) => {
+              const sao = wo.feedback?.ratings[c.key];
+              return (
+                <div key={c.key} style={{ display: 'contents' }}>
+                  <dt>{c.label}</dt>
+                  <dd>{sao ? `${'★'.repeat(sao)}${'☆'.repeat(5 - sao)}` : '— khách không chấm —'}</dd>
+                </div>
+              );
+            })}
             <dt>Điểm chung</dt>
-            <dd><strong>{diemTrungBinh(wo.feedback.ratings)}/5</strong></dd>
+            <dd><strong>{diem !== null ? `${diem}/5` : '—'}</strong></dd>
             <dt>Mức thưởng</dt>
-            <dd>{thuong.nhan}</dd>
+            <dd>
+              {thuong.nhan}
+              {tienThuong(thuong.muc) > 0 ? ` · ${tienThuong(thuong.muc).toLocaleString('vi-VN')} đ` : ''}
+            </dd>
           </dl>
           {wo.feedback.yKien && <p style={{ marginTop: 12 }}>“{wo.feedback.yKien}”</p>}
+          {wo.feedback.voice && (
+            <div style={{ marginTop: 14 }}>
+              <p className="muted" style={{ marginBottom: 6 }}>
+                Khách nhắn bằng giọng nói ({wo.feedback.voice.giay} giây)
+              </p>
+              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+              <audio controls preload="none" style={{ width: '100%' }} src={`/api/voice/${wo.id}`} />
+            </div>
+          )}
         </div>
       )}
 
