@@ -15,8 +15,20 @@ export function nextWoId(existingIds: string[], now = new Date()): string {
 }
 
 /**
+ * Điểm của một lần đánh giá, hiểu cả hai cách chấm:
+ *  - bản hiện tại: một mức hài lòng 1..5 (hàng mặt cười)
+ *  - bản cũ: sao riêng từng tiêu chí -> lấy trung bình
+ * Khách bấm "chưa xong" thì không chấm gì -> null.
+ */
+export function diemCua(fb?: Feedback): number | null {
+  if (!fb) return null;
+  if (typeof fb.mucHaiLong === 'number') return fb.mucHaiLong;
+  return fb.ratings ? diemTrungBinh(fb.ratings) : null;
+}
+
+/**
  * Điểm chung = trung bình các tiêu chí khách đã chấm, làm tròn 2 số.
- * Khách bấm "chưa xong" thì không chấm sao -> không có điểm, trả về null.
+ * Chỉ dùng cho bản ghi chấm theo cách cũ.
  */
 export function diemTrungBinh(r: Ratings): number | null {
   const vals = CRITERIA.map((c) => r[c.key]).filter((v): v is number => typeof v === 'number');
@@ -42,13 +54,15 @@ export interface KetQuaThuong {
 export function xepThuong(fb?: Feedback): KetQuaThuong {
   if (!fb) return { muc: 'khong', nhan: 'Chưa có đánh giá', diem: null };
 
-  const d = diemTrungBinh(fb.ratings);
+  const d = diemCua(fb);
   if (!fb.daXong) return { muc: 'khong', nhan: 'Khách báo chưa xong — không xét thưởng', diem: d };
   if (d === null) return { muc: 'khong', nhan: 'Khách chưa chấm điểm', diem: null };
 
-  if (d >= 4.75) return { muc: 'A', nhan: 'Mức A — xuất sắc', diem: d };
-  if (d >= 4.25) return { muc: 'B', nhan: 'Mức B — tốt', diem: d };
-  if (d >= 3.5) return { muc: 'C', nhan: 'Mức C — đạt', diem: d };
+  // Ngưỡng đặt theo thang 5 mặt cười: rất tốt = A, tốt = B, tạm = C.
+  // Bản ghi cũ chấm sao từng mục ra số lẻ cũng rơi đúng mức tương ứng.
+  if (d >= 4.5) return { muc: 'A', nhan: 'Mức A — xuất sắc', diem: d };
+  if (d >= 3.5) return { muc: 'B', nhan: 'Mức B — tốt', diem: d };
+  if (d >= 2.5) return { muc: 'C', nhan: 'Mức C — đạt', diem: d };
   return { muc: 'khong', nhan: 'Dưới chuẩn — BQL xem lại', diem: d };
 }
 

@@ -30,7 +30,7 @@ BQL bấm một cái là tạo việc với đúng tên. Khách **gọi hotline*
 
 | Đường dẫn | Ai dùng | Làm gì |
 |---|---|---|
-| `/login` | BQL | Một mật khẩu dùng chung |
+| `/login` | BQL | Đăng nhập Google, chỉ nhận email `@nhadat.company` (mật khẩu chung là đường dự phòng ở `/login?mk=1`) |
 | `/admin` | BQL | Việc đang mở, việc chờ khách đánh giá, hộp thư Zalo |
 | `/admin/new` | BQL | Tạo việc: chọn căn 1–50, tên khách, hạng mục, mô tả, thợ |
 | `/admin/wo/[id]` | BQL | Chi tiết, đổi trạng thái, **QR + link đánh giá**, dòng thời gian |
@@ -39,15 +39,19 @@ BQL bấm một cái là tạo việc với đúng tên. Khách **gọi hotline*
 
 ## Đánh giá và thưởng
 
-Khách trả lời **"đã xong chưa"** rồi chấm 1–5 cho 4 tiêu chí: *đến đúng hẹn · thái độ, tác phong ·
-chất lượng sửa chữa · dọn vệ sinh*. Điểm của việc là trung bình 4 tiêu chí.
+Khách trả lời **"đã xong chưa"**, chọn **một mặt cười** (1–5) cho mức hài lòng, rồi tick nhanh
+**thợ được ở chỗ nào** (đến đúng hẹn · thái độ lịch sự · sửa được việc · dọn dẹp sạch sẽ).
+Tất cả gọn trong một màn hình, vài lần chạm là xong.
 
-| Mức | Điểm |
-|---|---|
-| A — xuất sắc | từ 4,75 |
-| B — tốt | từ 4,25 |
-| C — đạt | từ 3,5 |
-| Không thưởng | dưới 3,5 |
+| Mặt cười | Mức | Tiền |
+|---|---|---|
+| 😍 Rất tốt | A — xuất sắc | 500.000 đ |
+| 🙂 Tốt | B — tốt | 300.000 đ |
+| 😐 Tạm | C — đạt | 100.000 đ |
+| 🙁 😠 | Không thưởng | 0 |
+
+Các mục tick không tính vào tiền — chúng cho BQL biết thợ được và chưa được ở chỗ nào.
+Bản ghi cũ chấm sao từng mục vẫn đọc và xếp mức bình thường.
 
 Khách bấm **chưa xong** thì việc đó **không xét thưởng**, dù chấm mấy sao — việc chưa xong thì
 chưa có gì để thưởng. Số tiền mỗi mức để trống trong `BONUS_VND` (`lib/wo.ts`) cho tới khi sếp chốt;

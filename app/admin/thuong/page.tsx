@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { daDangNhap } from '@/lib/auth';
 import { danhSachWo } from '@/lib/store';
-import { diemTrungBinh, tienThuong, xepThuong } from '@/lib/wo';
+import { diemCua, tienThuong, xepThuong } from '@/lib/wo';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +19,7 @@ export default async function Thuong() {
     const ten = w.tho || '(chưa ghi tên thợ)';
     const cur = theoTho.get(ten) || { viec: 0, tongDiem: 0, soCham: 0, A: 0, B: 0, C: 0, khong: 0 };
     cur.viec += 1;
-    const d = diemTrungBinh(w.feedback!.ratings);
+    const d = diemCua(w.feedback);
     if (d !== null) {
       cur.tongDiem += d;
       cur.soCham += 1;   // việc khách báo "chưa xong" không có điểm, không kéo trung bình xuống

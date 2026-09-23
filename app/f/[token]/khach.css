@@ -1,191 +1,142 @@
-/* Trang của khách: kính mờ kiểu iOS. Tách riêng khỏi globals.css vì trang quản trị
-   cố ý giữ giao diện đặc, dễ đọc - còn trang này khách chỉ chạm vài cái rồi thoát. */
+/* Trang của khách: sáng, sạch, một màn hình - chấm xong bấm gửi là xong.
+   Tách riêng khỏi globals.css vì trang quản trị cố ý giữ giao diện đặc, dễ đọc. */
 .k{
-  --ink:#1B1614;
-  --ink-2:rgba(27,22,20,.62);
-  --ink-3:rgba(27,22,20,.42);
-  --glass:rgba(255,255,255,.58);
-  --glass-strong:rgba(255,255,255,.78);
-  --edge:rgba(255,255,255,.75);
-  --edge-soft:rgba(255,255,255,.45);
-  --shade:0 10px 30px rgba(94,49,28,.10), 0 2px 6px rgba(94,49,28,.06);
-  --shade-lift:0 16px 40px rgba(94,49,28,.18);
-  --accent:#A03A18;
-  --accent-2:#C8642F;
+  --bg:#FFFFFF;
+  --ink:#0B1220;
+  --ink-2:#5B6478;
+  --ink-3:#98A1B3;
+  --line:#E8EBF0;
+  --field:#F4F6FA;
+  --accent:#1B5CFF;
   --accent-ink:#FFFFFF;
-  --star:#E0A32B;
-  --star-off:rgba(27,22,20,.18);
-  --ok:#0B7B67;
-  --g1:rgba(226,124,64,.42);
-  --g2:rgba(214,72,40,.30);
-  --g3:rgba(120,158,120,.28);
-  --ground:#FDF6EE;
-  --blur:blur(28px) saturate(180%);
-  --r:22px;
+  --accent-soft:#EBF1FF;
+  --tick:#16A34A;
+  --warn:#B4531A;
+  --r:16px;
   --ease:cubic-bezier(.32,.72,0,1);
 
-  color:var(--ink); background:var(--ground);
+  background:var(--bg); color:var(--ink);
   font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
-  font-size:17px; line-height:1.5; -webkit-font-smoothing:antialiased;
-  -webkit-tap-highlight-color:transparent;
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
   min-height:100dvh; display:flex; flex-direction:column;
-  max-width:430px; margin:0 auto; padding-inline:16px; padding-block:0 22px;
-  position:relative; isolation:isolate;
+  max-width:430px; margin:0 auto; padding-inline:20px; padding-block:0 28px;
 }
 @media (prefers-color-scheme: dark){
   .k{
-    --ink:#F6F1EA;
-    --ink-2:rgba(246,241,234,.66);
-    --ink-3:rgba(246,241,234,.44);
-    --glass:rgba(255,255,255,.09);
-    --glass-strong:rgba(255,255,255,.14);
-    --edge:rgba(255,255,255,.18);
-    --edge-soft:rgba(255,255,255,.10);
-    --shade:0 12px 34px rgba(0,0,0,.45);
-    --shade-lift:0 18px 44px rgba(0,0,0,.55);
-    --accent:#E2825A;
-    --accent-2:#C2603A;
-    --accent-ink:#1A0F08;
-    --star:#F0C24B;
-    --star-off:rgba(246,241,234,.22);
-    --ok:#4CC3A7;
-    --g1:rgba(197,92,48,.40);
-    --g2:rgba(96,58,140,.34);
-    --g3:rgba(40,104,110,.36);
-    --ground:#0C0D12;
+    --bg:#0F1420; --ink:#F2F5FA; --ink-2:#A3ADC2; --ink-3:#6C7789;
+    --line:#1E2635; --field:#161E2C; --accent:#4B82FF; --accent-ink:#06101F;
+    --accent-soft:#16243F; --tick:#34D07F; --warn:#E3A06A;
   }
 }
 
-/* nền sống động để lớp kính có cái mà làm mờ */
-.k::before{
-  content:""; position:fixed; inset:-20%; z-index:-1; pointer-events:none;
-  background:
-    radial-gradient(42% 34% at 18% 12%, var(--g1), transparent 70%),
-    radial-gradient(46% 38% at 88% 24%, var(--g2), transparent 72%),
-    radial-gradient(52% 40% at 50% 96%, var(--g3), transparent 74%);
-  filter:blur(10px);
+.k .top{display:flex; align-items:center; gap:10px; padding-block:16px 4px;
+        position:sticky; top:0; background:var(--bg); z-index:2}
+.k .top .ten{font-size:15px; font-weight:600}
+.k .top .phu{font-size:13px; color:var(--ink-3); margin-left:auto; text-align:right}
+
+.k h1{font-size:26px; font-weight:700; letter-spacing:-.025em; margin:14px 0 0; text-wrap:balance}
+.k h2{font-size:16px; font-weight:600; margin:26px 0 10px; letter-spacing:-.01em}
+.k .sub{color:var(--ink-2); font-size:14px; margin:6px 0 0}
+
+/* xong chưa */
+.k .doi{display:flex; gap:10px; margin-top:12px}
+.k .doi button{
+  flex:1; appearance:none; min-height:54px; border-radius:var(--r); cursor:pointer; font:inherit;
+  font-size:16px; font-weight:600; color:var(--ink); background:var(--field); border:1.5px solid transparent;
+  transition:transform .12s var(--ease), border-color .18s, background .18s, color .18s;
 }
+.k .doi button:active{transform:scale(.97)}
+.k .doi button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.k .doi button.xau[aria-pressed="true"]{background:var(--warn); border-color:var(--warn); color:#fff}
 
-.k .bar{position:sticky; top:0; z-index:3; padding-block:14px 10px;
-        background:linear-gradient(to bottom, var(--ground), transparent)}
-.k .track{height:3px; border-radius:99px; background:var(--edge-soft); overflow:hidden}
-.k .track i{display:block; height:100%; border-radius:99px;
-            background:linear-gradient(90deg, var(--accent), var(--accent-2));
-            transition:width .45s var(--ease)}
-.k .ctx{display:flex; align-items:center; gap:10px; margin-top:12px; min-height:28px}
-.k .back{appearance:none; border:0; background:transparent; color:var(--accent); font:inherit;
-         font-size:15px; font-weight:500; padding:2px 6px 2px 0; cursor:pointer;
-         flex:none; white-space:nowrap}
-.k .who{font-size:13px; color:var(--ink-2); padding:5px 12px; border-radius:99px;
-        min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-        background:var(--glass); -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);
-        box-shadow:inset 0 .5px 0 var(--edge), 0 1px 3px rgba(0,0,0,.06)}
-.k .who b{color:var(--ink); font-weight:600}
-
-.k .stage{flex:1; display:flex; flex-direction:column; justify-content:center; padding-block:10px 0}
-.k .step{display:flex; flex-direction:column; gap:20px; animation:kSlide .44s var(--ease)}
-.k .step.lui{animation:kSlideBack .44s var(--ease)}
-@keyframes kSlide{from{opacity:0; transform:translateX(24px) scale(.985)} to{opacity:1; transform:none}}
-@keyframes kSlideBack{from{opacity:0; transform:translateX(-24px) scale(.985)} to{opacity:1; transform:none}}
-
-.k h1{font-size:30px; line-height:1.2; font-weight:700; letter-spacing:-.028em; margin:0; text-wrap:balance}
-.k .sub{margin:-10px 0 0; color:var(--ink-2); font-size:15px}
-
-.k .big{
-  appearance:none; width:100%; min-height:64px; border-radius:var(--r); cursor:pointer; font:inherit;
-  font-size:18px; font-weight:600; letter-spacing:-.01em; color:var(--ink);
-  background:var(--glass); border:0; box-shadow:inset 0 0 0 .8px var(--edge), var(--shade);
-  -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  transition:transform .14s var(--ease), box-shadow .2s, background .2s, color .2s;
+/* hàng mặt cười */
+.k .mat{display:flex; justify-content:space-between; gap:6px; margin-top:4px}
+.k .mat button{
+  appearance:none; background:none; border:0; padding:0; cursor:pointer; flex:1;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
 }
-.k .big:active{transform:scale(.965)}
-.k .big:disabled{opacity:.5; cursor:default}
-.k .big.pick{background:linear-gradient(180deg, var(--accent-2), var(--accent)); color:var(--accent-ink);
-             box-shadow:inset 0 .8px 0 rgba(255,255,255,.35), var(--shade-lift)}
-.k .big.ghost{font-size:16px; font-weight:500; min-height:54px; color:var(--ink-2);
-              background:transparent; box-shadow:inset 0 0 0 .8px var(--edge-soft)}
-.k .stack{display:flex; flex-direction:column; gap:12px}
-
-.k .stars{display:flex; gap:8px; justify-content:space-between}
-.k .stars button{
-  appearance:none; flex:1; aspect-ratio:1/1; max-width:66px; border-radius:20px; cursor:pointer;
-  background:var(--glass); border:0; padding:0;
-  box-shadow:inset 0 0 0 .8px var(--edge), var(--shade);
-  -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);
-  display:flex; align-items:center; justify-content:center;
-  transition:transform .14s var(--ease), box-shadow .2s, background .2s;
+.k .mat .vong{
+  width:100%; max-width:58px; aspect-ratio:1/1; border-radius:50%; background:var(--field);
+  display:flex; align-items:center; justify-content:center; font-size:26px; line-height:1;
+  position:relative; transition:transform .16s var(--ease), background .18s, box-shadow .18s;
 }
-.k .stars button:active{transform:scale(.9)}
-.k .stars svg{width:30px; height:30px; display:block}
-.k .stars svg path{fill:var(--star-off); transition:fill .2s}
-.k .stars button.lit svg path{fill:var(--star)}
-.k .stars button.lit{background:var(--glass-strong); box-shadow:inset 0 0 0 1px var(--star), var(--shade-lift)}
-.k .scale{display:flex; justify-content:space-between; color:var(--ink-3); font-size:13px; margin-top:-10px}
+.k .mat button:active .vong{transform:scale(.9)}
+.k .mat button[aria-pressed="true"] .vong{
+  background:var(--accent); transform:scale(1.08); box-shadow:0 8px 20px rgba(27,92,255,.30);
+}
+.k .mat button[aria-pressed="true"] .vong::after{
+  content:"✓"; position:absolute; top:-3px; right:-3px; width:20px; height:20px; border-radius:50%;
+  background:var(--bg); color:var(--accent); font-size:12px; font-weight:800;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 1.5px var(--accent);
+}
+.k .mat .nhan{font-size:12px; font-weight:600; color:transparent; transition:color .18s}
+.k .mat button[aria-pressed="true"] .nhan{color:var(--accent)}
+
+/* danh sách tick */
+.k .ds{list-style:none; margin:0; padding:0}
+.k .ds li{border-bottom:1px solid var(--line)}
+.k .ds li:last-child{border-bottom:0}
+.k .ds button{
+  width:100%; appearance:none; background:none; border:0; cursor:pointer; font:inherit; color:var(--ink);
+  display:flex; align-items:center; gap:14px; padding:15px 2px; text-align:left;
+}
+.k .ds .chu{flex:1; font-size:16px}
+.k .ds .o{width:24px; height:24px; border-radius:50%; border:1.8px solid var(--line); flex:none;
+          display:flex; align-items:center; justify-content:center; color:transparent; font-size:13px;
+          font-weight:800; transition:background .18s, border-color .18s, color .18s}
+.k .ds button[aria-pressed="true"] .o{background:var(--tick); border-color:var(--tick); color:#fff}
 
 .k textarea{
-  width:100%; min-height:106px; padding:16px; font:inherit; font-size:17px; color:var(--ink);
-  background:var(--glass); border:0; border-radius:var(--r); resize:none;
-  box-shadow:inset 0 0 0 .8px var(--edge), var(--shade);
-  -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);
+  width:100%; min-height:104px; padding:14px 16px; font:inherit; font-size:16px; color:var(--ink);
+  background:var(--bg); border:1.5px solid var(--line); border-radius:var(--r); resize:none; margin-top:4px;
 }
 .k textarea::placeholder{color:var(--ink-3)}
-.k textarea:focus{outline:none; box-shadow:inset 0 0 0 1.6px var(--accent), var(--shade)}
-.k .big:focus-visible,.k .stars button:focus-visible,.k .back:focus-visible,.k .mic:focus-visible{
-  outline:2.5px solid var(--accent); outline-offset:3px}
-
-.k .hoac{display:flex; align-items:center; gap:12px; color:var(--ink-3); font-size:13px; margin:-4px 0}
-.k .hoac::before,.k .hoac::after{content:""; flex:1; height:1px; background:var(--edge-soft)}
+.k textarea:focus{outline:none; border-color:var(--accent)}
 
 .k .mic{
-  appearance:none; width:100%; min-height:62px; border-radius:var(--r); cursor:pointer; font:inherit;
-  font-size:17px; font-weight:500; color:var(--ink); background:var(--glass); border:0;
-  box-shadow:inset 0 0 0 .8px var(--edge), var(--shade);
-  -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);
-  display:flex; align-items:center; justify-content:center; gap:12px;
-  transition:transform .14s var(--ease), box-shadow .2s, background .2s, color .2s;
+  width:100%; appearance:none; min-height:52px; border-radius:var(--r); cursor:pointer; font:inherit;
+  font-size:16px; font-weight:600; color:var(--accent); background:var(--accent-soft); border:0;
+  display:flex; align-items:center; justify-content:center; gap:10px; margin-top:10px;
+  transition:transform .12s var(--ease), background .18s, color .18s;
 }
 .k .mic:active{transform:scale(.97)}
-.k .mic svg{width:22px; height:22px; flex:none}
-.k .mic svg path{fill:currentColor}
-.k .mic.thu{background:linear-gradient(180deg, var(--accent-2), var(--accent)); color:var(--accent-ink);
-            box-shadow:inset 0 .8px 0 rgba(255,255,255,.35), var(--shade-lift)}
-.k .giay{font-variant-numeric:tabular-nums; font-weight:700}
-
-.k .song{display:flex; align-items:center; gap:4px; height:20px}
-.k .song i{width:3px; border-radius:99px; background:currentColor; height:5px; opacity:.9;
-           animation:kNhay .9s var(--ease) infinite}
+.k .mic.thu{background:var(--accent); color:var(--accent-ink)}
+.k .mic svg{width:19px; height:19px; fill:currentColor; flex:none}
+.k .giay{font-variant-numeric:tabular-nums}
+.k .song{display:flex; align-items:center; gap:3px; height:16px}
+.k .song i{width:3px; border-radius:99px; background:currentColor; height:4px; animation:kNhay .9s var(--ease) infinite}
 .k .song i:nth-child(2){animation-delay:.12s}
 .k .song i:nth-child(3){animation-delay:.24s}
 .k .song i:nth-child(4){animation-delay:.36s}
-.k .song i:nth-child(5){animation-delay:.48s}
-@keyframes kNhay{0%,100%{height:5px}50%{height:18px}}
+@keyframes kNhay{0%,100%{height:4px}50%{height:15px}}
 
-.k .daghi{display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:var(--r);
-          background:var(--glass-strong); box-shadow:inset 0 0 0 .8px var(--edge), var(--shade);
-          -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur)}
-.k .daghi .nhan{flex:1; font-size:15px}
-.k .daghi .nhan b{font-weight:700; font-variant-numeric:tabular-nums}
-.k .daghi button{appearance:none; border:0; background:none; color:var(--accent); font:inherit;
-                 font-size:15px; font-weight:600; cursor:pointer; padding:6px}
-.k .ghichu{font-size:13px; color:var(--ink-3); margin:-2px 0 0}
-.k .loi{font-size:15px; color:var(--accent); margin:0}
+.k .daghi{display:flex; align-items:center; gap:12px; padding:13px 16px; border-radius:var(--r);
+          background:var(--accent-soft); margin-top:10px; font-size:15px}
+.k .daghi b{font-variant-numeric:tabular-nums}
+.k .daghi .x{margin-left:auto; appearance:none; border:0; background:none; color:var(--accent);
+             font:inherit; font-size:15px; font-weight:600; cursor:pointer; padding:4px}
+.k .ghichu{font-size:13px; color:var(--ink-3); margin:8px 0 0}
+.k .loi{font-size:14px; color:var(--warn); margin:10px 0 0}
 
-.k .done{align-items:center; text-align:center; gap:18px}
-.k .tick{width:92px; height:92px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-         background:var(--glass-strong); box-shadow:inset 0 0 0 1px var(--edge), var(--shade-lift);
-         -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur); animation:kPop .55s var(--ease)}
-.k .tick svg{width:42px; height:42px}
-.k .tick svg path{stroke:var(--ok); stroke-width:3.4; fill:none; stroke-linecap:round; stroke-linejoin:round;
-                  stroke-dasharray:40; stroke-dashoffset:40; animation:kDraw .55s var(--ease) .18s forwards}
-@keyframes kPop{from{transform:scale(.55); opacity:0} to{transform:none; opacity:1}}
-@keyframes kDraw{to{stroke-dashoffset:0}}
-.k .score{display:inline-flex; gap:6px; padding:9px 18px; border-radius:99px; font-weight:600; font-size:15px;
-          background:var(--glass); box-shadow:inset 0 0 0 .8px var(--edge), var(--shade);
-          -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur)}
+.k .gui{
+  width:100%; appearance:none; min-height:56px; margin-top:26px; border-radius:var(--r); border:0;
+  background:var(--accent); color:var(--accent-ink); font:inherit; font-size:17px; font-weight:700;
+  cursor:pointer; transition:transform .12s var(--ease), opacity .18s;
+}
+.k .gui:active{transform:scale(.98)}
+.k .gui:disabled{opacity:.45; cursor:default}
+
+.k .xong-man{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+             text-align:center; gap:16px; padding-bottom:40px}
+.k .tick-to{width:86px; height:86px; border-radius:50%; background:var(--accent-soft); color:var(--tick);
+            display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:800;
+            animation:kPop .5s var(--ease)}
+@keyframes kPop{from{transform:scale(.6); opacity:0} to{transform:none; opacity:1}}
+
+.k .gui:focus-visible,.k .mic:focus-visible,.k .doi button:focus-visible,
+.k .mat button:focus-visible,.k .ds button:focus-visible{outline:2.5px solid var(--accent); outline-offset:3px}
 
 @media (prefers-reduced-motion:reduce){
-  .k .step,.k .tick,.k .tick svg path,.k .song i{animation:none}
-  .k .track i{transition:none}
-  .k .big:active,.k .stars button:active,.k .mic:active{transform:none}
+  .k *{animation:none!important}
+  .k .doi button:active,.k .mat button:active .vong,.k .gui:active,.k .mic:active{transform:none}
 }

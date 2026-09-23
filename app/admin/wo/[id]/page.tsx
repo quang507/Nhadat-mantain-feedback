@@ -7,7 +7,7 @@ import { layWo, luuWo } from '@/lib/store';
 import { createToken } from '@/lib/token';
 import { getUnit } from '@/lib/units';
 import { CHANNEL_LABEL, CRITERIA, STATUS_LABEL, type Status } from '@/lib/types';
-import { coTheChuyen, diemTrungBinh, tienThuong, xepThuong } from '@/lib/wo';
+import { coTheChuyen, diemCua, tienThuong, xepThuong } from '@/lib/wo';
 import { baoBQL, guiZaloOA } from '@/lib/notify';
 
 export const dynamic = 'force-dynamic';
@@ -37,7 +37,7 @@ export default async function ChiTiet({
 
   const unit = getUnit(wo.unitId);
   const thuong = xepThuong(wo.feedback);
-  const diem = wo.feedback ? diemTrungBinh(wo.feedback.ratings) : null;
+  const diem = diemCua(wo.feedback);
 
   async function chuyen(formData: FormData) {
     'use server';
@@ -156,16 +156,27 @@ export default async function ChiTiet({
             {wo.feedback.nguoiDanhGia} · {gio(wo.feedback.luc)}
           </p>
           <dl className="kv">
-            {CRITERIA.map((c) => {
-              const sao = wo.feedback?.ratings[c.key];
-              return (
-                <div key={c.key} style={{ display: 'contents' }}>
-                  <dt>{c.label}</dt>
-                  <dd>{sao ? `${'★'.repeat(sao)}${'☆'.repeat(5 - sao)}` : '— khách không chấm —'}</dd>
-                </div>
-              );
-            })}
-            <dt>Điểm chung</dt>
+            {wo.feedback.ratings &&
+              CRITERIA.map((c) => {
+                const sao = wo.feedback?.ratings?.[c.key];
+                return (
+                  <div key={c.key} style={{ display: 'contents' }}>
+                    <dt>{c.label}</dt>
+                    <dd>{sao ? `${'★'.repeat(sao)}${'☆'.repeat(5 - sao)}` : '— khách không chấm —'}</dd>
+                  </div>
+                );
+              })}
+            {wo.feedback.mucHaiLong !== undefined && (
+              <div style={{ display: 'contents' }}>
+                <dt>Khách khen</dt>
+                <dd>
+                  {wo.feedback.khen?.length
+                    ? CRITERIA.filter((c) => wo.feedback?.khen?.includes(c.key)).map((c) => c.label).join(' · ')
+                    : '— không tick mục nào —'}
+                </dd>
+              </div>
+            )}
+            <dt>Mức hài lòng</dt>
             <dd><strong>{diem !== null ? `${diem}/5` : '—'}</strong></dd>
             <dt>Mức thưởng</dt>
             <dd>

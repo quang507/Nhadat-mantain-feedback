@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { layWo, luuVoice, luuWo } from '@/lib/store';
 import { readToken } from '@/lib/token';
-import { CRITERIA, type CriteriaKey, type Ratings, type VoiceNote } from '@/lib/types';
-import { diemTrungBinh, xepThuong } from '@/lib/wo';
+import { CRITERIA, type CriteriaKey, type VoiceNote } from '@/lib/types';
+import { diemCua, xepThuong } from '@/lib/wo';
 import { baoBQL } from '@/lib/notify';
 
 export const dynamic = 'force-dynamic';
@@ -18,20 +18,22 @@ const DUOI_THEO_MIME: Record<string, string> = {
   'audio/aac': 'aac',
 };
 
-/** Khách bấm "chưa xong" thì không chấm sao -> chấp nhận bỏ trống. */
-function docRatings(raw: unknown, batBuoc: boolean): Ratings | null {
-  if (raw === undefined || raw === null) return batBuoc ? null : {};
-  if (typeof raw !== 'object') return null;
-  const r = raw as Record<string, unknown>;
-  const out: Ratings = {};
-  for (const c of CRITERIA) {
-    const v = r[c.key];
-    if (v === undefined || v === null) {
-      if (batBuoc) return null;
-      continue;
-    }
-    if (typeof v !== 'number' || !Number.isInteger(v) || v < 1 || v > 5) return null;
-    out[c.key as CriteriaKey] = v;
+/** Mức hài lòng: 1..5 từ hàng mặt cười. Khách báo "chưa xong" thì không chấm. */
+function docMucHaiLong(raw: unknown, batBuoc: boolean): number | null | 'loi' {
+  if (raw === undefined || raw === null) return batBuoc ? 'loi' : null;
+  if (typeof raw !== 'number' || !Number.isInteger(raw) || raw < 1 || raw > 5) return 'loi';
+  return raw;
+}
+
+/** Các mục khách tick là thợ làm được. Chỉ nhận đúng tên tiêu chí đã định nghĩa. */
+function docKhen(raw: unknown): CriteriaKey[] | 'loi' {
+  if (raw === undefined || raw === null) return [];
+  if (!Array.isArray(raw)) return 'loi';
+  const hopLe = CRITERIA.map((c) => c.key as string);
+  const out: CriteriaKey[] = [];
+  for (const v of raw) {
+    if (typeof v !== 'string' || !hopLe.includes(v)) return 'loi';
+    if (!out.includes(v as CriteriaKey)) out.push(v as CriteriaKey);
   }
   return out;
 }
@@ -70,8 +72,11 @@ export async function POST(req: Request) {
   const daXong = body.daXong;
   if (typeof daXong !== 'boolean') return NextResponse.json({ loi: 'Chưa chọn công việc đã xong chưa' }, { status: 400 });
 
-  const ratings = docRatings(body.ratings, daXong);
-  if (!ratings) return NextResponse.json({ loi: 'Chấm chưa đủ 4 mục' }, { status: 400 });
+  const mucHaiLong = docMucHaiLong(body.mucHaiLong, daXong);
+  if (mucHaiLong === 'loi') return NextResponse.json({ loi: 'Chưa chọn mức hài lòng' }, { status: 400 });
+
+  const khen = docKhen(body.khen);
+  if (khen === 'loi') return NextResponse.json({ loi: 'Danh sách khen không hợp lệ' }, { status: 400 });
 
   const voice = docVoice(body.voice);
   if (voice === 'loi') return NextResponse.json({ loi: 'Lời nhắn bằng giọng nói không gửi được' }, { status: 400 });
@@ -105,11 +110,11 @@ export async function POST(req: Request) {
   }
 
   const now = new Date().toISOString();
-  const diem = diemTrungBinh(ratings);
 
   wo.feedback = {
     daXong,
-    ratings,
+    ...(mucHaiLong !== null ? { mucHaiLong } : {}),
+    ...(khen.length ? { khen } : {}),
     yKien,
     ...(voiceNote ? { voice: voiceNote } : {}),
     nguoiDanhGia: wo.khach,   // đã biết từ lúc tiếp nhận, không bắt khách gõ lại
@@ -120,11 +125,14 @@ export async function POST(req: Request) {
   if (daXong) wo.dongLuc = now;
   wo.token = undefined; // link đã dùng xong
 
+  const diem = diemCua(wo.feedback);
+
   wo.log.push({
     luc: now,
     ai: 'Khách',
     viec:
-      (daXong ? `Xác nhận đã xong${diem !== null ? `, điểm ${diem}/5` : ''}` : 'Báo CHƯA xong') +
+      (daXong ? `Xác nhận đã xong${diem !== null ? `, mức hài lòng ${diem}/5` : ''}` : 'Báo CHƯA xong') +
+      (khen.length ? ` · khen ${khen.length}/4 mục` : '') +
       (voiceNote ? ` · có lời nhắn ${voiceNote.giay}s` : ''),
   });
   if (voiceLoi) wo.log.push({ luc: now, ai: 'Hệ thống', viec: voiceLoi });
@@ -134,7 +142,7 @@ export async function POST(req: Request) {
   const thuong = xepThuong(wo.feedback);
   await baoBQL(
     `${wo.id} — căn ${wo.unitId}: ${daXong ? 'khách xác nhận XONG' : 'khách báo CHƯA XONG'}\n` +
-      `${diem !== null ? `Điểm ${diem}/5 · ` : ''}${thuong.nhan}\n` +
+      `${diem !== null ? `Mức hài lòng ${diem}/5 · ` : ''}${thuong.nhan}\n` +
       (yKien ? `Ý kiến: ${yKien}\n` : '') +
       (voiceNote ? `Có lời nhắn bằng giọng nói (${voiceNote.giay}s), nghe trong trang việc.` : ''),
   );

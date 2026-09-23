@@ -65,28 +65,26 @@ try {
   const khach = await browser.newContext(ctxOpts);
   const trangKhach = await khach.newPage();
   await trangKhach.goto(link);
-  kiemTra((await trangKhach.locator('h1').innerText()) === 'Thợ làm xong việc chưa ạ?', 'khách mở được form');
+  kiemTra((await trangKhach.locator('h1').innerText()) === 'Anh/chị thấy thợ làm thế nào?', 'khách mở được form');
   kiemTra(!(await trangKhach.locator('body').innerText()).includes('0900000000'), 'form của khách không in số điện thoại ra màn hình');
   kiemTra((await trangKhach.locator('#nguoi').count()) === 0, 'không bắt khách gõ lại tên mình');
 
   await trangKhach.waitForSelector('button:has-text("Xong rồi"):not([disabled])', { timeout: 20000 });
+  kiemTra(await trangKhach.locator('button.gui').isDisabled(), 'chưa chọn gì thì chưa cho gửi');
+
   await trangKhach.click('button:has-text("Xong rồi")');
+  await trangKhach.waitForSelector('h1 ~ h2:has-text("hài lòng"), h2:has-text("hài lòng")', { timeout: 10000 });
+  kiemTra(await trangKhach.locator('button.gui').isDisabled(), 'chọn xong rồi nhưng chưa chấm mặt thì vẫn chưa cho gửi');
 
-  // bốn câu hỏi, mỗi câu một màn; chấm xong là tự sang câu kế
-  for (const cau of ['Thợ đến có đúng hẹn không?', 'Thái độ, tác phong thế nào?',
-                     'Sửa có được việc không?', 'Làm xong có dọn sạch không?']) {
-    await trangKhach.waitForSelector(`h1:has-text("${cau}")`, { timeout: 15000 });
-    await trangKhach.click('button[aria-label="5 trên 5"]');
-  }
-  kiemTra(true, 'bốn câu hỏi tự chuyển màn sau mỗi lần chấm');
-
-  await trangKhach.waitForSelector('h1:has-text("nhắn gì thêm")', { timeout: 15000 });
+  await trangKhach.click('button[aria-label="Rất tốt!"]');
+  await trangKhach.click('button:has-text("Đến đúng hẹn")');
+  await trangKhach.click('button:has-text("Dọn dẹp sạch sẽ")');
   kiemTra(await trangKhach.locator('button:has-text("Nhắn bằng giọng nói")').isVisible(), 'có nút nhắn bằng giọng nói');
 
   await trangKhach.fill('#ykien', 'Thợ đến đúng hẹn, làm xong dọn sạch.');
-  await trangKhach.click('button:has-text("Gửi cho Ban quản lý")');
+  await trangKhach.click('button.gui');
   await trangKhach.waitForSelector('h1:has-text("Cảm ơn")', { timeout: 20000 });
-  kiemTra(true, 'khách gửi được nhận xét');
+  kiemTra(true, 'khách gửi được nhận xét chỉ bằng vài lần chạm');
 
   console.log('5. Link dùng lần hai phải bị chặn');
   const lan2 = await khach.newPage();
@@ -102,7 +100,8 @@ try {
   await trangBQL.goto(woUrl);
   const noiDung = await trangBQL.locator('body').innerText();
   kiemTra(noiDung.includes('Xác nhận đã xong'), 'chi tiết việc hiện "đã xong"');
-  kiemTra(noiDung.includes('5/5'), 'hiện điểm 5/5');
+  kiemTra(noiDung.includes('5/5'), 'hiện mức hài lòng 5/5');
+  kiemTra(noiDung.includes('Đến đúng hẹn'), 'hiện các mục khách khen');
   kiemTra(noiDung.includes('Mức A'), 'xếp mức thưởng A');
 
   await trangBQL.goto(`${BASE}/admin/thuong`);

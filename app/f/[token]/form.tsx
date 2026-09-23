@@ -13,14 +13,22 @@ interface Props {
   tho: string;
 }
 
-type Diem = Partial<Record<CriteriaKey, number>>;
-
 const GIAY_TOI_DA = 60;
-const CAU_HOI: Record<CriteriaKey, { hoi: string; thap: string; cao: string }> = {
-  dung_hen: { hoi: 'Thợ đến có đúng hẹn không?', thap: 'Trễ nhiều', cao: 'Rất đúng giờ' },
-  thai_do: { hoi: 'Thái độ, tác phong thế nào?', thap: 'Chưa được', cao: 'Rất tốt' },
-  chat_luong: { hoi: 'Sửa có được việc không?', thap: 'Còn lỗi', cao: 'Rất ổn' },
-  ve_sinh: { hoi: 'Làm xong có dọn sạch không?', thap: 'Còn bừa', cao: 'Sạch sẽ' },
+
+/** Năm mức hài lòng. Mặt khác nhau nên người không phân biệt màu vẫn chọn đúng. */
+const MUC = [
+  { icon: '😠', nhan: 'Tệ' },
+  { icon: '🙁', nhan: 'Chưa được' },
+  { icon: '😐', nhan: 'Tạm' },
+  { icon: '🙂', nhan: 'Tốt' },
+  { icon: '😍', nhan: 'Rất tốt!' },
+];
+
+const KHEN: Record<CriteriaKey, string> = {
+  dung_hen: 'Đến đúng hẹn',
+  thai_do: 'Thái độ lịch sự',
+  chat_luong: 'Sửa được việc',
+  ve_sinh: 'Dọn dẹp sạch sẽ',
 };
 
 function dinhDang(s: number): string {
@@ -33,14 +41,6 @@ function rung(kieu: number | number[]) {
   } catch {
     /* máy không có thì thôi */
   }
-}
-
-function Sao() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.4-5.8-3-5.8 3 1.1-6.4L2.6 9.4l6.5-.9z" />
-    </svg>
-  );
 }
 
 function IconMic() {
@@ -66,7 +66,7 @@ function useGhiAm() {
   const dung = useCallback(() => {
     if (demRef.current) clearInterval(demRef.current);
     demRef.current = null;
-    recRef.current?.state === 'recording' && recRef.current.stop();
+    if (recRef.current?.state === 'recording') recRef.current.stop();
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     setDangThu(false);
@@ -92,9 +92,7 @@ function useGhiAm() {
       return;
     }
 
-    const kieu = ['audio/webm', 'audio/mp4', 'audio/ogg'].find(
-      (m) => MediaRecorder.isTypeSupported?.(m),
-    );
+    const kieu = ['audio/webm', 'audio/mp4', 'audio/ogg'].find((m) => MediaRecorder.isTypeSupported?.(m));
     const rec = new MediaRecorder(stream, kieu ? { mimeType: kieu } : undefined);
     const mieng: Blob[] = [];
 
@@ -137,75 +135,32 @@ function useGhiAm() {
   return { dangThu, giay, xong, loi, bat, dung, xoa };
 }
 
-function NutGhiAm({ chu, ghi }: { chu: string; ghi: ReturnType<typeof useGhiAm> }) {
-  if (ghi.xong) {
-    return (
-      <div className="daghi">
-        <div className="nhan">
-          Đã ghi <b>{dinhDang(ghi.xong.giay)}</b> giọng nói
-        </div>
-        <button type="button" onClick={ghi.xoa}>Ghi lại</button>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <button
-        type="button"
-        className={`mic${ghi.dangThu ? ' thu' : ''}`}
-        onClick={() => (ghi.dangThu ? ghi.dung() : ghi.bat())}
-      >
-        <IconMic />
-        {ghi.dangThu ? (
-          <>
-            <span>
-              Đang nghe · <span className="giay">{dinhDang(ghi.giay)}</span> · chạm để dừng
-            </span>
-            <span className="song" aria-hidden="true">
-              <i /><i /><i /><i /><i />
-            </span>
-          </>
-        ) : (
-          <span>{chu}</span>
-        )}
-      </button>
-      {ghi.loi ? (
-        <p className="ghichu">{ghi.loi}</p>
-      ) : (
-        <p className="ghichu">Chỉ Ban quản lý nghe lại lời nhắn này.</p>
-      )}
-    </>
-  );
-}
-
 export default function FormDanhGia(p: Props) {
-  const [buoc, setBuoc] = useState(0);   // 0: xong chưa · 1..4: bốn tiêu chí · 5: nhắn thêm
-  const [lui, setLui] = useState(false);
   const [daXong, setDaXong] = useState<boolean | null>(null);
-  const [diem, setDiem] = useState<Diem>({});
+  const [muc, setMuc] = useState(0);                       // 1..5
+  const [khen, setKhen] = useState<CriteriaKey[]>([]);
   const [yKien, setYKien] = useState('');
   const [dangGui, setDangGui] = useState(false);
   const [loi, setLoi] = useState('');
   const [guiRoi, setGuiRoi] = useState(false);
+  const [sanSang, setSanSang] = useState(false);
 
   const ghi = useGhiAm();
+  useEffect(() => setSanSang(true), []);
 
-  function di(toi: number, veTruoc = false) {
-    setLui(veTruoc);
-    setBuoc(toi);
-  }
+  // Xong rồi: phải chọn mức hài lòng. Chưa xong: phải nói rõ vì sao (gõ hoặc nói).
+  const duocGui =
+    sanSang &&
+    (daXong === true ? muc > 0 : daXong === false ? Boolean(yKien.trim()) || Boolean(ghi.xong) : false);
 
   function chonXong(giaTri: boolean) {
     setDaXong(giaTri);
     rung(8);
-    setTimeout(() => di(giaTri ? 1 : 5), 180);
   }
 
-  function chamSao(key: CriteriaKey, n: number) {
-    setDiem((cu) => ({ ...cu, [key]: n }));
-    rung(8);
-    setTimeout(() => di(buoc + 1), 270);
+  function doiKhen(key: CriteriaKey) {
+    setKhen((cu) => (cu.includes(key) ? cu.filter((k) => k !== key) : [...cu, key]));
+    rung(6);
   }
 
   async function gui() {
@@ -218,7 +173,8 @@ export default function FormDanhGia(p: Props) {
         body: JSON.stringify({
           token: p.token,
           daXong,
-          ratings: daXong ? diem : undefined,
+          mucHaiLong: daXong ? muc : undefined,
+          khen: daXong ? khen : undefined,
           yKien: yKien.trim(),
           voice: ghi.xong ? { data: ghi.xong.base64, mime: ghi.xong.mime, giay: ghi.xong.giay } : undefined,
         }),
@@ -237,158 +193,127 @@ export default function FormDanhGia(p: Props) {
     }
   }
 
-  /* ---- màn cảm ơn ---- */
   if (guiRoi) {
-    const chamDu = CRITERIA.map((c) => diem[c.key]).filter((v): v is number => typeof v === 'number');
-    const tb = chamDu.length ? Math.round((chamDu.reduce((a, b) => a + b, 0) / chamDu.length) * 10) / 10 : null;
     return (
       <main className="k">
-        <div className="stage">
-          <section className="step done">
-            <div className="tick">
-              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 25l8 8 15-17" /></svg>
-            </div>
-            <h1>{daXong ? 'Cảm ơn anh/chị' : 'Đã báo Ban quản lý'}</h1>
-            <p className="sub">
-              {daXong
-                ? 'Ban quản lý đã nhận nhận xét của anh/chị.'
-                : 'Ban quản lý sẽ cho thợ quay lại xử lý và báo lại anh/chị.'}
-            </p>
-            {daXong && tb !== null && (
-              <div className="score">
-                {p.tho || 'Thợ'}: {String(tb).replace('.', ',')} / 5
-              </div>
-            )}
-          </section>
+        <div className="xong-man">
+          <div className="tick-to">✓</div>
+          <h1>{daXong ? 'Cảm ơn anh/chị' : 'Đã báo Ban quản lý'}</h1>
+          <p className="sub">
+            {daXong
+              ? `Ban quản lý đã nhận nhận xét${muc ? ` — ${MUC[muc - 1].nhan.replace('!', '')}` : ''}${
+                  khen.length ? `, khen thợ ${khen.length}/4 mục.` : '.'
+                }`
+              : 'Ban quản lý sẽ cho thợ quay lại xử lý và báo lại anh/chị.'}
+          </p>
         </div>
       </main>
     );
   }
 
-  const tongBuoc = daXong === false ? 2 : 6;
-  const buocHienTai = daXong === false ? (buoc === 5 ? 2 : 1) : buoc + 1;
-  const tieuChi = buoc >= 1 && buoc <= 4 ? CRITERIA[buoc - 1] : null;
-  const stepClass = `step${lui ? ' lui' : ''}`;
-
   return (
     <main className="k">
-      <div className="bar">
-        <div className="track">
-          <i style={{ width: `${Math.round((buocHienTai / tongBuoc) * 100)}%` }} />
-        </div>
-        <div className="ctx">
-          {buoc > 0 && (
-            <button
-              type="button"
-              className="back"
-              onClick={() => {
-                if (daXong === false) { setDaXong(null); di(0, true); }
-                else di(buoc - 1, true);
-              }}
-            >
-              ‹ Quay lại
-            </button>
-          )}
-          <span className="who">
-            Căn <b>{p.unitId}</b> · {p.hangMuc}
-            {p.tho ? <> · thợ <b>{p.tho}</b></> : null}
-          </span>
-        </div>
+      <div className="top">
+        <span className="ten">Căn {p.unitId}</span>
+        <span className="phu">{p.hangMuc}{p.tho ? ` · thợ ${p.tho}` : ''}</span>
       </div>
 
-      <div className="stage">
-        {buoc === 0 && (
-          <section className={stepClass} key="b0">
-            <h1>Thợ làm xong việc chưa ạ?</h1>
-            <p className="sub">{p.moTa}</p>
-            <div className="stack">
-              <button type="button" className="big" onClick={() => chonXong(true)}>Xong rồi</button>
-              <button type="button" className="big" onClick={() => chonXong(false)}>Chưa xong</button>
-            </div>
-          </section>
-        )}
+      <h1>Anh/chị thấy thợ làm thế nào?</h1>
+      <p className="sub">{p.moTa}</p>
 
-        {tieuChi && (
-          <section className={stepClass} key={tieuChi.key}>
-            <h1>{CAU_HOI[tieuChi.key].hoi}</h1>
-            <div className="stars" role="group" aria-label={tieuChi.label}>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className={(diem[tieuChi.key] ?? 0) >= n ? 'lit' : ''}
-                  aria-label={`${n} trên 5`}
-                  onClick={() => chamSao(tieuChi.key, n)}
-                >
-                  <Sao />
+      <h2>Việc đã xong chưa?</h2>
+      <div className="doi">
+        <button type="button" disabled={!sanSang} aria-pressed={daXong === true} onClick={() => chonXong(true)}>
+          Xong rồi
+        </button>
+        <button type="button" className="xau" disabled={!sanSang} aria-pressed={daXong === false}
+          onClick={() => chonXong(false)}>
+          Chưa xong
+        </button>
+      </div>
+
+      {daXong === true && (
+        <>
+          <h2>Anh/chị hài lòng tới đâu?</h2>
+          <div className="mat" role="group" aria-label="Mức hài lòng">
+            {MUC.map((m, i) => (
+              <button key={m.nhan} type="button" aria-pressed={muc === i + 1} aria-label={m.nhan}
+                onClick={() => { setMuc(i + 1); rung(8); }}>
+                <span className="vong" aria-hidden="true">{m.icon}</span>
+                <span className="nhan">{m.nhan}</span>
+              </button>
+            ))}
+          </div>
+
+          <h2>Thợ được ở chỗ nào ạ?</h2>
+          <ul className="ds">
+            {CRITERIA.map((c) => (
+              <li key={c.key}>
+                <button type="button" aria-pressed={khen.includes(c.key)} onClick={() => doiKhen(c.key)}>
+                  <span className="chu">{KHEN[c.key]}</span>
+                  <span className="o" aria-hidden="true">✓</span>
                 </button>
-              ))}
-            </div>
-            <div className="scale">
-              <span>{CAU_HOI[tieuChi.key].thap}</span>
-              <span>{CAU_HOI[tieuChi.key].cao}</span>
-            </div>
-          </section>
-        )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
-        {buoc === 5 && daXong === true && (
-          <section className={stepClass} key="b5">
-            <h1>Anh/chị muốn nhắn gì thêm không?</h1>
-            <p className="sub">Không bắt buộc — bỏ qua cũng được.</p>
-            <textarea
-              id="ykien"
-              value={yKien}
-              onChange={(e) => setYKien(e.target.value)}
-              placeholder="Ví dụ: thợ đến sớm hơn hẹn, làm xong lau sạch sàn."
-            />
-            <div className="hoac">hoặc nói cho nhanh</div>
-            <NutGhiAm chu="Nhắn bằng giọng nói" ghi={ghi} />
-            {loi && <p className="loi">{loi}</p>}
-            <div className="stack">
-              <button type="button" className="big pick" disabled={dangGui} onClick={gui}>
-                {dangGui ? 'Đang gửi…' : 'Gửi cho Ban quản lý'}
-              </button>
-              <button
-                type="button"
-                className="big ghost"
-                disabled={dangGui}
-                onClick={() => { setYKien(''); ghi.xoa(); gui(); }}
-              >
-                Không có gì thêm, gửi luôn
-              </button>
-            </div>
-          </section>
-        )}
+      <h2>{daXong === false ? 'Còn chỗ nào chưa ổn ạ?' : 'Muốn nhắn gì thêm không?'}</h2>
+      <textarea
+        id="ykien"
+        value={yKien}
+        onChange={(e) => setYKien(e.target.value)}
+        placeholder={
+          daXong === false
+            ? 'Ví dụ: chân bồn rửa vẫn còn rỉ nước.'
+            : 'Không bắt buộc — anh/chị gõ vài chữ hoặc bấm nói.'
+        }
+      />
 
-        {buoc === 5 && daXong === false && (
-          <section className={stepClass} key="b5x">
-            <h1>Còn chỗ nào chưa ổn ạ?</h1>
-            <p className="sub">Ban quản lý sẽ cho thợ quay lại xử lý.</p>
-            <textarea
-              id="chua-on"
-              value={yKien}
-              onChange={(e) => setYKien(e.target.value)}
-              placeholder="Ví dụ: chân bồn rửa vẫn còn rỉ nước."
-            />
-            <div className="hoac">hoặc nói cho nhanh</div>
-            <NutGhiAm chu="Nói cho Ban quản lý nghe" ghi={ghi} />
-            {loi && <p className="loi">{loi}</p>}
-            <div className="stack">
-              <button
-                type="button"
-                className="big pick"
-                disabled={dangGui || (!yKien.trim() && !ghi.xong)}
-                onClick={gui}
-              >
-                {dangGui ? 'Đang gửi…' : 'Báo Ban quản lý'}
-              </button>
-            </div>
-            {!yKien.trim() && !ghi.xong && (
-              <p className="ghichu">Anh/chị ghi vài chữ hoặc bấm nói, để thợ biết đường quay lại.</p>
-            )}
-          </section>
-        )}
-      </div>
+      {ghi.xong ? (
+        <div className="daghi">
+          Đã ghi <b>{dinhDang(ghi.xong.giay)}</b> giọng nói
+          <button className="x" type="button" onClick={ghi.xoa}>Ghi lại</button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className={`mic${ghi.dangThu ? ' thu' : ''}`}
+          disabled={!sanSang}
+          onClick={() => (ghi.dangThu ? ghi.dung() : ghi.bat())}
+        >
+          <IconMic />
+          {ghi.dangThu ? (
+            <>
+              <span>Đang nghe · <span className="giay">{dinhDang(ghi.giay)}</span> · chạm để dừng</span>
+              <span className="song" aria-hidden="true"><i /><i /><i /><i /></span>
+            </>
+          ) : (
+            <span>Nhắn bằng giọng nói</span>
+          )}
+        </button>
+      )}
+
+      <p className="ghichu">
+        {ghi.loi || 'Chỉ Ban quản lý nghe lại lời nhắn này.'}
+      </p>
+
+      {loi && <p className="loi">{loi}</p>}
+
+      <button type="button" className="gui" disabled={!duocGui || dangGui} onClick={gui}>
+        {dangGui ? 'Đang gửi…' : daXong === false ? 'Báo Ban quản lý' : 'Gửi cho Ban quản lý'}
+      </button>
+
+      {!duocGui && sanSang && (
+        <p className="ghichu">
+          {daXong === null
+            ? 'Anh/chị chọn giúp việc đã xong chưa.'
+            : daXong
+              ? 'Anh/chị chọn giúp một mặt ở trên.'
+              : 'Anh/chị ghi vài chữ hoặc bấm nói, để thợ biết đường quay lại.'}
+        </p>
+      )}
     </main>
   );
 }

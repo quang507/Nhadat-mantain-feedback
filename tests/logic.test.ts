@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeAll } from 'bun:test';
-import { nextWoId, diemTrungBinh, xepThuong, coTheChuyen, tienThuong } from '../lib/wo';
+import { nextWoId, diemTrungBinh, diemCua, xepThuong, coTheChuyen, tienThuong } from '../lib/wo';
 import type { Feedback, Ratings } from '../lib/types';
 import { doanHangMuc } from '../lib/doan';
 
@@ -26,23 +26,35 @@ describe('mã việc', () => {
   });
 });
 
+const fbMuc = (daXong: boolean, mucHaiLong: number): Feedback => ({
+  daXong, mucHaiLong, yKien: '', nguoiDanhGia: 'Chị Trang', luc: new Date().toISOString(), jti: 'x',
+});
+
 describe('điểm và mức thưởng', () => {
-  test('điểm là trung bình 4 tiêu chí', () => {
+  test('mỗi mặt cười ra đúng một mức thưởng', () => {
+    expect(xepThuong(fbMuc(true, 5)).muc).toBe('A');
+    expect(xepThuong(fbMuc(true, 4)).muc).toBe('B');
+    expect(xepThuong(fbMuc(true, 3)).muc).toBe('C');
+    expect(xepThuong(fbMuc(true, 2)).muc).toBe('khong');
+    expect(xepThuong(fbMuc(true, 1)).muc).toBe('khong');
+  });
+
+  test('khách báo chưa xong thì không thưởng dù mặt cười cao nhất', () => {
+    expect(xepThuong(fbMuc(false, 5)).muc).toBe('khong');
+  });
+
+  test('bản ghi cũ chấm sao từng mục vẫn đọc và xếp mức được', () => {
     expect(diemTrungBinh(r(5, 5, 4, 4))).toBe(4.5);
-    expect(diemTrungBinh(r(5, 4, 4, 4))).toBe(4.25);
-  });
-
-  test('xếp mức theo ngưỡng', () => {
+    expect(diemCua(fb(true, r(5, 5, 4, 4)))).toBe(4.5);
     expect(xepThuong(fb(true, r(5, 5, 5, 4))).muc).toBe('A');   // 4.75
-    expect(xepThuong(fb(true, r(5, 4, 4, 4))).muc).toBe('B');   // 4.25
-    expect(xepThuong(fb(true, r(4, 4, 3, 3))).muc).toBe('C');   // 3.5
-    expect(xepThuong(fb(true, r(3, 3, 3, 3))).muc).toBe('khong');
+    expect(xepThuong(fb(true, r(4, 4, 4, 4))).muc).toBe('B');   // 4
+    expect(xepThuong(fb(true, r(3, 3, 3, 3))).muc).toBe('C');   // 3
+    expect(xepThuong(fb(true, r(2, 2, 2, 2))).muc).toBe('khong');
   });
 
-  test('khách báo chưa xong thì không xét thưởng dù chấm cao', () => {
-    const kq = xepThuong(fb(false, r(5, 5, 5, 5)));
-    expect(kq.muc).toBe('khong');
-    expect(kq.diem).toBe(5);
+  test('mức hài lòng mới được ưu tiên hơn sao cũ nếu có cả hai', () => {
+    const lanLon: Feedback = { ...fb(true, r(1, 1, 1, 1)), mucHaiLong: 5 };
+    expect(diemCua(lanLon)).toBe(5);
   });
 
   test('chưa có đánh giá thì không có điểm', () => {

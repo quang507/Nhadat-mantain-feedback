@@ -38,16 +38,13 @@ try {
   await trangBQL.goto(`${BASE}/admin/new`);
   await trangBQL.selectOption('#unitId', '27');
   await trangBQL.fill('#khach', 'Anh Dũng');
-  await trangBQL.selectOption('#hangMuc', 'Điện');
-  await trangBQL.fill('#moTa', 'Ổ cắm bếp không có điện');
+  await trangBQL.fill('#moTa', 'Ổ cắm bếp không có điện');   // hạng mục để hệ thống tự nhận
   await trangBQL.fill('#tho', 'Anh Tuấn');
   await trangBQL.click('button[type=submit]');
   await trangBQL.waitForURL('**/admin/wo/**');
   const woUrl = trangBQL.url();
   const woId = woUrl.split('/').pop();
 
-  await trangBQL.click('button:has-text("Giao thợ")');
-  await trangBQL.waitForSelector('button:has-text("Thợ báo xong")');
   await trangBQL.click('button:has-text("Thợ báo xong")');
   await trangBQL.waitForSelector('.qr img', { timeout: 15000 });
   const link = await trangBQL.inputValue('#link');
@@ -59,11 +56,11 @@ try {
   await trangKhach.waitForSelector('button:has-text("Chưa xong"):not([disabled])');
   await trangKhach.click('button:has-text("Chưa xong")');
 
-  await trangKhach.waitForSelector('h1:has-text("Còn chỗ nào chưa ổn")');
-  const nutGui = trangKhach.locator('button:has-text("Báo Ban quản lý")');
+  await trangKhach.waitForSelector('h2:has-text("Còn chỗ nào chưa ổn")');
+  const nutGui = trangKhach.locator('button.gui');
   kiemTra(await nutGui.isDisabled(), 'chưa nói, chưa gõ gì thì chưa cho gửi');
 
-  await trangKhach.click('button:has-text("Nói cho Ban quản lý nghe")');
+  await trangKhach.click('button:has-text("Nhắn bằng giọng nói")');
   await trangKhach.waitForSelector('button:has-text("chạm để dừng")', { timeout: 15000 });
   kiemTra(true, 'bấm là bắt đầu ghi, nút đổi sang trạng thái đang nghe');
 

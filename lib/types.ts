@@ -55,7 +55,9 @@ export interface VoiceNote {
 
 export interface Feedback {
   daXong: boolean;          // "việc đã xong chưa" - câu quan trọng nhất
-  ratings: Ratings;         // khách bấm "chưa xong" thì bỏ trống, không bắt chấm sao
+  mucHaiLong?: number;      // 1..5, một lần chạm trên hàng mặt cười (cách chấm hiện tại)
+  khen?: CriteriaKey[];     // các mục khách tick là thợ làm được
+  ratings?: Ratings;        // cách chấm cũ: sao riêng từng mục - giữ để đọc bản ghi cũ
   yKien: string;
   voice?: VoiceNote;
   nguoiDanhGia: string;     // tên người nhận xét, vd "Chị Trang"

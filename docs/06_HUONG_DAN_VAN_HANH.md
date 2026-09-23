@@ -8,7 +8,9 @@ Bản chạy: **https://nhadat-bao-tri.vercel.app**
 | Bảng thưởng đội thợ | BQL, sếp | https://nhadat-bao-tri.vercel.app/admin/thuong |
 | Form đánh giá | **Khách** | link riêng từng việc, sinh ra khi thợ báo xong |
 
-Trang quản trị hỏi **một mật khẩu dùng chung** cho BQL. Khách không cần mật khẩu, không cần cài gì.
+Trang quản trị đăng nhập bằng **Google**, chỉ tài khoản **@nhadat.company** vào được.
+Khi Google trục trặc thì còn đường dự phòng bằng mật khẩu chung ở `/login?mk=1`.
+Khách không cần mật khẩu, không cần cài gì.
 
 ---
 
@@ -45,8 +47,9 @@ Gửi không được thì hệ thống ghi rõ lý do vào dòng thời gian v�
    chọn căn (1–50), tên khách, hạng mục, khách báo gì, thợ nào. Hệ thống sinh mã `WO-YYMM-nnn`.
 2. **Giao thợ** — Mở việc, bấm **Giao thợ, bắt đầu làm**.
 3. **Thợ báo xong** — Bấm **Thợ báo xong → lấy mã đánh giá**. QR và link hiện ra.
-4. **Khách chấm** — Khách trả lời *đã xong chưa* rồi chấm 1–5 cho bốn mục:
-   đến đúng hẹn · thái độ, tác phong · chất lượng sửa chữa · dọn vệ sinh.
+4. **Khách chấm** — Khách trả lời *đã xong chưa*, chọn **một mặt cười** cho mức hài lòng,
+   rồi tick nhanh thợ được ở chỗ nào (đúng hẹn · thái độ · sửa được việc · dọn sạch).
+   Cả form gọn trong một màn hình.
    - Chọn **Đã xong** → việc đóng lại, hệ thống xếp mức thưởng.
    - Chọn **Chưa xong** → việc **tự mở lại**, BQL cho thợ quay lại; lần đó không xét thưởng.
 5. **Xem lại** — `/admin/thuong` gom điểm theo từng thợ để sếp duyệt thưởng cuối tháng.

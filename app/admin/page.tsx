@@ -4,7 +4,7 @@ import { COOKIE, aiDangDangNhap, daDangNhap } from '@/lib/auth';
 import { chayTam, danhSachWo, layInbox, layWo, luuWo } from '@/lib/store';
 import { STATUS_LABEL, type WorkOrder } from '@/lib/types';
 import { createToken } from '@/lib/token';
-import { coTheChuyen, dangMo, diemTrungBinh, soNgayMo } from '@/lib/wo';
+import { coTheChuyen, dangMo, diemCua, soNgayMo } from '@/lib/wo';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,7 +93,7 @@ export default async function Admin() {
 
   // Việc khách báo "chưa xong" không có điểm, nên chỉ lấy trung bình trên việc đã chấm.
   const coDiem = tatCa
-    .map((w) => (w.feedback ? diemTrungBinh(w.feedback.ratings) : null))
+    .map((w) => diemCua(w.feedback))
     .filter((d): d is number => d !== null);
   const diemTB = coDiem.length
     ? Math.round((coDiem.reduce((a, b) => a + b, 0) / coDiem.length) * 100) / 100
