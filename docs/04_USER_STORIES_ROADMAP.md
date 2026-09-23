@@ -87,8 +87,13 @@
 
 ## 5. Việc cần sếp/BQL quyết
 
-1. Chọn phương án **A / B / C** (khuyến nghị **C**).
-2. Danh sách 50 chủ hộ (tên + SĐT) để prefill form — ai cung cấp, khi nào?
-3. Nhà Đạt đã có **Zalo OA** chưa? Nếu có thì dùng để gửi tin nghiệm thu; nếu chưa, giai đoạn 1 gửi tay.
-4. Duyệt **danh mục hạng mục và mốc SLA** ở tài liệu 03 §2.
-5. Ai được xem dashboard và nội dung nhận xét (chỉ sếp + trưởng BQL?).
+~~1. Chọn phương án A / B / C~~ → **đã chốt: Phương án C** (Next.js + Supabase), 23/09/2026.
+~~2. Nhà Đạt đã có Zalo OA chưa?~~ → **đã có OA**; dùng OA gửi tin nghiệm thu 1-1, Telegram cho nội bộ.
+
+Còn lại chờ sếp/BQL:
+
+1. Danh sách **50 chủ hộ** (tên + SĐT) để prefill form và gửi tin OA — ai cung cấp, khi nào?
+2. **Quyền truy cập Zalo OA** cho dev (App ID/secret, quyền gửi tin) + ai duyệt template T1/T2/T3.
+3. Duyệt **danh mục hạng mục và mốc SLA** ở tài liệu 03 §2.
+4. Ai được xem dashboard và nội dung nhận xét (chỉ sếp + trưởng BQL?).
+5. Duyệt ngân sách **ZNS** nếu chọn gửi theo SĐT thay vì chỉ gửi cho người đã quan tâm OA.

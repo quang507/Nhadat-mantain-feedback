@@ -1,6 +1,16 @@
 # Phương án triển khai — Bảo trì & Phản hồi Ny'ah Phú Định
 
-Người lập: BA. Ngày: 2026-09-23. Trạng thái: **chờ sếp chốt hướng**.
+Người lập: BA. Ngày: 2026-09-23. Trạng thái: **đã chốt hướng kỹ thuật, chờ sếp duyệt để bắt tay làm**.
+
+---
+
+## 0. Quyết định đã chốt (23/09/2026)
+
+| Nội dung | Quyết định |
+|---|---|
+| Nền tảng | **Phương án C** — Next.js trên Vercel + Supabase (Postgres + Storage) |
+| Kênh thông báo | **Zalo OA của Nhà Đạt** (đã có OA) là kênh chính tới cư dân; Telegram giữ làm kênh nội bộ BQL/dự phòng |
+| Bước tiếp theo | **Dừng ở tài liệu**, chưa code — chờ sếp duyệt |
 
 ---
 
@@ -110,8 +120,8 @@ Dữ liệu căn 10 lấy từ `lib/units.ts` repo chatbot: mẫu **Fusion Gen 5
 
 | Vấn đề | Hiện trạng hiểu biết | Việc cần làm |
 |---|---|---|
-| Gửi tin tự động vào **nhóm Zalo thường** | Theo tôi biết, Zalo **không có API công khai** để bot gửi tin vào nhóm chat cá nhân — **độ tin cậy trung bình, cần kiểm chứng** | Kiểm tra tài liệu Zalo OA hiện hành; nếu không được thì giai đoạn 1 **BQL dán link thủ công**, thông báo nội bộ đi Telegram |
-| **Zalo OA / ZNS** | Cần có OA đã duyệt, template tin được phê duyệt, tính phí theo tin | Xác nhận Nhà Đạt đã có OA chưa; lấy bảng giá chính thức |
+| Gửi tin tự động vào **nhóm Zalo thường** | Theo tôi biết, Zalo **không có API công khai** để bot gửi tin vào nhóm chat cá nhân — **độ tin cậy trung bình, chưa kiểm chứng được** | Không phụ thuộc vào nhóm chat: gửi tin **1-1 qua OA** tới từng chủ hộ; nhóm Zalo vẫn dùng để trao đổi tay |
+| **Zalo OA** — đã có (xác nhận 23/09/2026) | Cần xác định dùng **tin tư vấn** (chỉ gửi được cho người đã tương tác/quan tâm OA, có ràng buộc cửa sổ thời gian) hay **ZNS** (gửi theo SĐT, template phải được duyệt, **tính phí theo tin**). Tôi **chưa đọc được tài liệu Zalo qua công cụ hiện tại** nên không khẳng định chi tiết | Dev lấy tài liệu chính thức tại developers.zalo.me + bảng giá ZNS; xin quyền truy cập OA (App ID, secret, quyền gửi tin); soạn 2–3 template chờ duyệt (xem §5.1) |
 | Nhận dạng cư dân | Chưa có danh sách chủ hộ/SĐT theo căn | BQL cung cấp danh sách 50 căn (tên, SĐT) để prefill & chống mạo danh |
 | Dữ liệu cá nhân | Form thu tên + SĐT + ảnh trong nhà | Thống nhất: chỉ BQL/sếp xem được; nêu rõ mục đích khi thu thập |
 
@@ -123,3 +133,14 @@ Dữ liệu căn 10 lấy từ `lib/units.ts` repo chatbot: mẫu **Fusion Gen 5
 - **In ấn:** 50 tem QR dán căn + phiếu nghiệm thu — chi phí nhỏ, cần báo giá nhà in.
 - **Công phát triển MVP:** ~1.5–2 tuần cho 1 dev (ước lượng của tôi, chưa phải cam kết).
 - **Đào tạo:** 1 buổi ~60 phút cho BQL + đội thợ; 1 tờ hướng dẫn A5 cho cư dân.
+
+### 5.1 Template tin Zalo OA cần soạn & xin duyệt
+
+| Mã | Khi nào gửi | Nội dung cốt lõi |
+|---|---|---|
+| T1 | Tiếp nhận yêu cầu | "Đã tiếp nhận WO-xxxx cho căn {n}, dự kiến xử lý trước {giờ}" |
+| T2 | Mời nghiệm thu | "Công việc WO-xxxx tại căn {n} đã hoàn thành — bấm vào đây để xác nhận & nhận xét" + **link form (thay cho QR khi ở xa)** |
+| T3 | Nhắc nghiệm thu | Nhắc 1 lần sau 24h nếu chưa có phản hồi |
+
+Lưu ý khi thiết kế: **QR vẫn là kênh chính tại chỗ** (thợ đưa cư dân quét ngay khi xong việc);
+tin OA chỉ là đường dự phòng cho trường hợp chủ nhà không có mặt. Như vậy hệ thống không chết nếu OA bị giới hạn.

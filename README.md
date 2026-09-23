@@ -4,6 +4,9 @@ Hồ sơ phân tích nghiệp vụ (BA) cho hệ thống **tiếp nhận yêu c�
 tại khu dân cư **Ny'ah Phú Định** (50 căn, Quận 8, TP.HCM) — chủ đầu tư Nhã Đạt.
 
 > Trạng thái: **tài liệu phương án, chưa code.** Repo hiện chỉ chứa tài liệu để sếp duyệt hướng đi.
+>
+> Đã chốt (23/09/2026): **Phương án C** — Next.js/Vercel + Supabase; kênh tới cư dân là **Zalo OA**
+> (Nhà Đạt đã có OA), kênh nội bộ là Telegram. Chưa bắt tay code, chờ sếp duyệt.
 
 ## Bối cảnh 1 dòng
 

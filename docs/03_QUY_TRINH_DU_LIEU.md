@@ -152,4 +152,7 @@ trong Zalo (Zalo in-app browser), không bắt cài app, không bắt đăng nh�
 | Feedback ≤ 2 sao hoặc "Chưa xong" | BQL + sếp |
 | Tổng kết tuần | Sếp: số WO, % đúng SLA, CSAT, top căn nhiều sự cố |
 
-Kênh giai đoạn 1: **Telegram** (đã chạy sẵn ở repo chatbot). Zalo OA để giai đoạn 2, sau khi kiểm chứng (xem 02 §5).
+**Kênh (đã chốt 23/09/2026):**
+- Tới **cư dân**: **Zalo OA** của Nhà Đạt, tin 1-1 theo template T1/T2/T3 (xem 02 §5.1) — kèm link form; QR vẫn là kênh chính tại chỗ.
+- **Nội bộ BQL/thợ**: **Telegram** (đã chạy sẵn ở repo chatbot), dùng cho WO mới/quá hạn/CSAT thấp — nhanh, không tốn phí tin.
+- Nhóm Zalo hiện tại giữ nguyên cho trao đổi tay; hệ thống **không phụ thuộc** vào việc gửi tự động vào nhóm.
