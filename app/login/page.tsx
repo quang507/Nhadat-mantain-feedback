@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { COOKIE, daDangNhap, dungMatKhau, taoPhien } from '@/lib/auth';
+import { COOKIE, HAN_NGAY, daDangNhap, dungMatKhau, taoPhien } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +16,7 @@ export default function Login({ searchParams }: { searchParams: { loi?: string }
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      maxAge: 12 * 3600,
+      maxAge: HAN_NGAY * 86_400,
     });
     redirect('/admin');
   }
@@ -24,14 +24,16 @@ export default function Login({ searchParams }: { searchParams: { loi?: string }
   return (
     <main className="wrap">
       <h1>Bảo trì Ny&apos;ah Phú Định</h1>
-      <p className="muted">Trang dành cho Ban quản lý.</p>
       <form action={dangNhap} className="card pad-lg" style={{ marginTop: 20 }}>
         {searchParams.loi ? <p className="err">Mật khẩu chưa đúng.</p> : null}
-        <label htmlFor="matkhau">Mật khẩu</label>
+        <label htmlFor="matkhau">Mật khẩu Ban quản lý</label>
         <input id="matkhau" name="matkhau" type="password" autoComplete="current-password" required autoFocus />
         <div className="btn-row">
-          <button type="submit">Vào trang quản lý</button>
+          <button type="submit">Vào</button>
         </div>
+        <p className="muted" style={{ marginTop: 12, marginBottom: 0 }}>
+          Máy này nhớ đăng nhập {HAN_NGAY} ngày.
+        </p>
       </form>
     </main>
   );

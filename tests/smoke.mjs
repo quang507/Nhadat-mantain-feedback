@@ -40,9 +40,6 @@ try {
   await trangBQL.goto(`${BASE}/admin/new`);
   await trangBQL.selectOption('#unitId', '10');
   await trangBQL.fill('#khach', 'Chị Trang');
-  await trangBQL.fill('#sdt', '0900000000');
-  await trangBQL.selectOption('#kenh', 'hotline');
-  await trangBQL.selectOption('#hangMuc', 'Cấp thoát nước');
   await trangBQL.fill('#moTa', 'Rò nước nhà tắm tầng 2');
   await trangBQL.fill('#tho', 'Anh Hùng');
   await trangBQL.click('button[type=submit]');
@@ -51,11 +48,13 @@ try {
   const woId = woUrl.split('/').pop();
   kiemTra(/^WO-\d{4}-\d{3}$/.test(woId), `sinh mã việc ${woId}`);
   kiemTra((await trangBQL.locator('h1').innerText()).includes('Căn 10'), 'trang chi tiết đúng căn 10');
+  const noiDungTao = await trangBQL.locator('body').innerText();
+  kiemTra(noiDungTao.includes('Cấp thoát nước'), 'tự nhận ra hạng mục từ câu khách báo');
+  kiemTra(noiDungTao.includes('Đang xử lý'), 'điền sẵn tên thợ thì vào thẳng đang xử lý, khỏi bấm giao thợ');
 
-  console.log('3. Giao thợ rồi báo xong');
-  await trangBQL.click('button:has-text("Giao thợ")');
-  await trangBQL.waitForSelector('button:has-text("Thợ báo xong")');
-  await trangBQL.click('button:has-text("Thợ báo xong")');
+  console.log('3. Thợ báo xong ngay từ danh sách việc');
+  await trangBQL.goto(`${BASE}/admin`);
+  await trangBQL.click('button:has-text("Thợ xong → QR")');
   await trangBQL.waitForSelector('.qr img', { timeout: 15000 });
   kiemTra(await trangBQL.locator('.qr img').isVisible(), 'hiện mã QR cho khách quét');
 

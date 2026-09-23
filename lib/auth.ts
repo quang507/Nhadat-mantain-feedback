@@ -4,7 +4,8 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { cookies } from 'next/headers';
 
 export const COOKIE = 'ndm_admin';
-const HAN_GIO = 12;
+/** Giữ đăng nhập 30 ngày. Máy mất thì đổi APP_SECRET là mọi phiên hết hiệu lực ngay. */
+export const HAN_NGAY = 30;
 
 function secret(): string {
   const s = process.env.APP_SECRET;
@@ -13,7 +14,7 @@ function secret(): string {
 }
 
 export function taoPhien(): string {
-  const exp = Date.now() + HAN_GIO * 3600_000;
+  const exp = Date.now() + HAN_NGAY * 86_400_000;
   const sig = createHmac('sha256', secret()).update(`admin:${exp}`).digest('hex');
   return `${exp}.${sig}`;
 }

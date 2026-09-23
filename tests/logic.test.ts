@@ -1,6 +1,7 @@
 import { describe, expect, test, beforeAll } from 'bun:test';
 import { nextWoId, diemTrungBinh, xepThuong, coTheChuyen, tienThuong } from '../lib/wo';
 import type { Feedback, Ratings } from '../lib/types';
+import { doanHangMuc } from '../lib/doan';
 
 beforeAll(() => {
   process.env.APP_SECRET = 'test-secret-chi-dung-trong-test';
@@ -87,5 +88,19 @@ describe('tiền thưởng', () => {
     expect(tienThuong('B')).toBe(300_000);
     expect(tienThuong('C')).toBe(100_000);
     expect(tienThuong('khong')).toBe(0);
+  });
+});
+
+describe('đoán hạng mục từ câu khách báo', () => {
+  test('bắt đúng vài câu hay gặp', () => {
+    expect(doanHangMuc('Rò nước nhà tắm tầng 2')).toBe('Cấp thoát nước');
+    expect(doanHangMuc('Ổ cắm bếp không có điện')).toBe('Điện');
+    expect(doanHangMuc('Máy lạnh phòng ngủ không mát')).toBe('Điều hòa / thông gió');
+    expect(doanHangMuc('Cửa phòng tắm bị kẹt')).toBe('Cửa & khóa');
+    expect(doanHangMuc('Trần bị thấm sau mưa')).toBe('Thấm dột');
+  });
+
+  test('không đoán được thì trả về Khác, không đoán bừa', () => {
+    expect(doanHangMuc('Nhờ BQL qua xem giúp một chút')).toBe('Khác');
   });
 });
