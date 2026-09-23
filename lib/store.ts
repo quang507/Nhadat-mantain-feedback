@@ -89,16 +89,23 @@ let branchReady = false;
 /** Tạo nhánh dữ liệu nếu chưa có (tách khỏi nhánh code để không deploy lại). */
 async function ensureBranch(): Promise<void> {
   if (branchReady) return;
-  const check = await fetch(`${API}/git/refs/heads/${BRANCH}`, { headers: ghHeaders(), cache: 'no-store' });
+  // Dùng git/ref/... (số ít) để lấy đúng một nhánh: git/refs/... trả về mảng,
+  // đọc .object.sha trên mảng sẽ ra undefined.
+  const check = await fetch(`${API}/git/ref/heads/${BRANCH}`, { headers: ghHeaders(), cache: 'no-store' });
   if (check.ok) {
     branchReady = true;
     return;
   }
-  const main = await fetch(`${API}/git/refs/heads/${SRC_BRANCH}`, { headers: ghHeaders(), cache: 'no-store' });
+  const main = await fetch(`${API}/git/ref/heads/${SRC_BRANCH}`, { headers: ghHeaders(), cache: 'no-store' });
   if (!main.ok) {
-    throw new Error(`Không đọc được nhánh ${SRC_BRANCH} (${main.status}) để tạo nhánh dữ liệu`);
+    const chiTiet = await main.text().catch(() => '');
+    throw new Error(
+      `Không đọc được nhánh ${SRC_BRANCH} (${main.status}) để tạo nhánh dữ liệu` +
+        ` · id=${main.headers.get('x-github-request-id') ?? '?'} · ${chiTiet.slice(0, 150)}`,
+    );
   }
   const sha = (await main.json())?.object?.sha;
+  if (!sha) throw new Error(`Nhánh ${SRC_BRANCH} không trả về mã commit để tạo nhánh dữ liệu`);
   const created = await fetch(`${API}/git/refs`, {
     method: 'POST',
     headers: ghHeaders(true),
