@@ -11,13 +11,18 @@ export const dynamic = 'force-dynamic';
 /** Zalo ký payload bằng SHA-256 của appId + data + timestamp + OASecretKey. */
 function chuKyHopLe(raw: string, mac: string | null): boolean {
   const secret = process.env.ZALO_OA_SECRET;
-  if (!secret) return true; // chưa cấu hình OA thì không chặn - giai đoạn này BQL vẫn làm tay
-  if (!mac) return false;
+  if (!secret || !mac) return false;
   const tinh = createHmac('sha256', secret).update(raw).digest('hex');
   return mac === tinh;
 }
 
 export async function POST(req: Request) {
+  // Chưa cấu hình OA thì đóng hẳn cửa này: để mở mà không kiểm chữ ký thì ai
+  // biết địa chỉ cũng ghi rác vào hộp thư của BQL.
+  if (!process.env.ZALO_OA_SECRET) {
+    return NextResponse.json({ loi: 'Chưa cấu hình Zalo OA' }, { status: 503 });
+  }
+
   const raw = await req.text();
   if (!chuKyHopLe(raw, req.headers.get('x-zevent-signature'))) {
     return NextResponse.json({ loi: 'Chữ ký không hợp lệ' }, { status: 401 });

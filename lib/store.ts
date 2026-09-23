@@ -11,6 +11,8 @@ import type { WorkOrder, ZaloInboxItem } from './types';
 const OWNER = process.env.GITHUB_OWNER || 'quang507';
 const REPO = process.env.GITHUB_REPO || 'Nhadat-mantain-feedback';
 const BRANCH = process.env.GITHUB_DATA_BRANCH || 'feedback-logs';
+/** Nhánh lấy làm gốc khi tạo nhánh dữ liệu lần đầu. */
+const SRC_BRANCH = process.env.GITHUB_BRANCH || 'main';
 const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
 
 const WO_DIR = 'wo';
@@ -88,15 +90,20 @@ async function ensureBranch(): Promise<void> {
     branchReady = true;
     return;
   }
-  const main = await fetch(`${API}/git/refs/heads/main`, { headers: ghHeaders(), cache: 'no-store' });
-  if (!main.ok) throw new Error('Không đọc được nhánh main để tạo nhánh dữ liệu');
+  const main = await fetch(`${API}/git/refs/heads/${SRC_BRANCH}`, { headers: ghHeaders(), cache: 'no-store' });
+  if (!main.ok) {
+    throw new Error(`Không đọc được nhánh ${SRC_BRANCH} (${main.status}) để tạo nhánh dữ liệu`);
+  }
   const sha = (await main.json())?.object?.sha;
   const created = await fetch(`${API}/git/refs`, {
     method: 'POST',
     headers: ghHeaders(),
     body: JSON.stringify({ ref: `refs/heads/${BRANCH}`, sha }),
   });
-  if (!created.ok && created.status !== 422) throw new Error('Không tạo được nhánh dữ liệu');
+  if (!created.ok && created.status !== 422) {
+    const chiTiet = await created.text().catch(() => '');
+    throw new Error(`Không tạo được nhánh ${BRANCH} (${created.status}): ${chiTiet.slice(0, 200)}`);
+  }
   branchReady = true;
 }
 
@@ -127,7 +134,10 @@ async function ghWrite(file: string, body: string, message: string): Promise<voi
       ...(cur ? { sha: cur.sha } : {}),
     }),
   });
-  if (!res.ok) throw new Error(`Ghi ${file} lỗi: ${res.status}`);
+  if (!res.ok) {
+    const chiTiet = await res.text().catch(() => '');
+    throw new Error(`Ghi ${file} lỗi ${res.status}: ${chiTiet.slice(0, 200)}`);
+  }
 }
 
 async function ghList(dir: string): Promise<string[]> {
@@ -212,6 +222,21 @@ export async function docVoice(woId: string, duoi: string): Promise<Buffer | nul
     return await fs.readFile(path.join(await localDir(), file));
   } catch {
     return null;
+  }
+}
+
+/**
+ * Thử ghi một file nhỏ để biết chắc máy chủ có quyền lưu dữ liệu hay không,
+ * và nếu hỏng thì hỏng ở đâu. Chỉ trang quản trị gọi được (xem /api/health).
+ */
+export async function thuGhi(): Promise<{ ok: boolean; ghiChu: string }> {
+  const file = '.kiem-tra-ghi.json';
+  const noiDung = JSON.stringify({ luc: new Date().toISOString() }, null, 2);
+  try {
+    await writeFile(file, noiDung, 'kiểm tra quyền ghi');
+    return { ok: true, ghiChu: dungGithub() ? `Ghi được lên nhánh ${BRANCH}` : 'Ghi được vào thư mục tạm' };
+  } catch (err) {
+    return { ok: false, ghiChu: String(err instanceof Error ? err.message : err) };
   }
 }
 
