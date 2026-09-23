@@ -170,7 +170,11 @@ function NutGhiAm({ chu, ghi }: { chu: string; ghi: ReturnType<typeof useGhiAm> 
           <span>{chu}</span>
         )}
       </button>
-      {ghi.loi && <p className="ghichu">{ghi.loi}</p>}
+      {ghi.loi ? (
+        <p className="ghichu">{ghi.loi}</p>
+      ) : (
+        <p className="ghichu">Chỉ Ban quản lý nghe lại lời nhắn này.</p>
+      )}
     </>
   );
 }
