@@ -16,17 +16,28 @@ const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
 const WO_DIR = 'wo';
 const INBOX_FILE = 'zalo-inbox.json';
 
-function dungGithub(): boolean {
-  // DATA_LOCAL=1 ép ghi vào .data/ ngay cả khi máy có sẵn GITHUB_TOKEN của việc khác.
+export function dungGithub(): boolean {
+  // DATA_LOCAL=1 ép ghi vào thư mục tạm ngay cả khi máy có sẵn GITHUB_TOKEN của việc khác.
   if (process.env.DATA_LOCAL === '1') return false;
   return Boolean(process.env.GITHUB_TOKEN);
+}
+
+/**
+ * Chưa cấu hình GITHUB_TOKEN trên Vercel = dữ liệu chỉ nằm trong ổ tạm của máy chủ
+ * và MẤT khi Vercel khởi động lại instance. Dùng để xem thử giao diện, không dùng thật.
+ * Trang quản trị đọc cờ này để hiện cảnh báo.
+ */
+export function chayTam(): boolean {
+  return !dungGithub() && Boolean(process.env.VERCEL);
 }
 
 /* ---------- ngăn local (chạy máy) ---------- */
 
 async function localDir() {
   const path = await import('path');
-  return path.join(process.cwd(), '.data');
+  // Trên Vercel chỉ /tmp ghi được; máy dev thì ghi vào .data/ ngay trong dự án.
+  if (process.env.DATA_DIR) return process.env.DATA_DIR;
+  return process.env.VERCEL ? '/tmp/ndm-data' : path.join(process.cwd(), '.data');
 }
 
 async function localRead(file: string): Promise<string | null> {

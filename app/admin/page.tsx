@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { daDangNhap } from '@/lib/auth';
-import { danhSachWo, layInbox } from '@/lib/store';
+import { chayTam, danhSachWo, layInbox } from '@/lib/store';
 import { STATUS_LABEL, type WorkOrder } from '@/lib/types';
 import { dangMo, soNgayMo, diemTrungBinh } from '@/lib/wo';
 
@@ -44,6 +44,13 @@ export default async function Admin() {
 
   return (
     <main className="wrap wide">
+      {chayTam() && (
+        <p className="err" style={{ marginBottom: 16 }}>
+          <strong>Đang chạy thử.</strong> Chưa cấu hình <code>GITHUB_TOKEN</code> nên dữ liệu chỉ nằm
+          trong ổ tạm của máy chủ và sẽ mất khi Vercel khởi động lại. Cứ bấm thử thoải mái,
+          nhưng đừng dùng cho việc thật cho tới khi cấu hình xong.
+        </p>
+      )}
       <div className="top">
         <div>
           <h1>Việc bảo trì</h1>
