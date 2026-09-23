@@ -1,0 +1,27 @@
+{
+  "name": "nhadat-maintain-feedback",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "bun test tests/",
+    "test:smoke": "node tests/smoke.mjs",
+    "test:voice": "node tests/smoke-voice.mjs"
+  },
+  "dependencies": {
+    "next": "14.2.3",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "playwright": "^1.63.0",
+    "typescript": "^5"
+  }
+}

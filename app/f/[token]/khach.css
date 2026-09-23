@@ -1,0 +1,142 @@
+/* Trang của khách: sáng, sạch, một màn hình - chấm xong bấm gửi là xong.
+   Tách riêng khỏi globals.css vì trang quản trị cố ý giữ giao diện đặc, dễ đọc. */
+.k{
+  --bg:#FFFFFF;
+  --ink:#0B1220;
+  --ink-2:#5B6478;
+  --ink-3:#98A1B3;
+  --line:#E8EBF0;
+  --field:#F4F6FA;
+  --accent:#1B5CFF;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#EBF1FF;
+  --tick:#16A34A;
+  --warn:#B4531A;
+  --r:16px;
+  --ease:cubic-bezier(.32,.72,0,1);
+
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
+  min-height:100dvh; display:flex; flex-direction:column;
+  max-width:430px; margin:0 auto; padding-inline:20px; padding-block:0 28px;
+}
+@media (prefers-color-scheme: dark){
+  .k{
+    --bg:#0F1420; --ink:#F2F5FA; --ink-2:#A3ADC2; --ink-3:#6C7789;
+    --line:#1E2635; --field:#161E2C; --accent:#4B82FF; --accent-ink:#06101F;
+    --accent-soft:#16243F; --tick:#34D07F; --warn:#E3A06A;
+  }
+}
+
+.k .top{display:flex; align-items:center; gap:10px; padding-block:16px 4px;
+        position:sticky; top:0; background:var(--bg); z-index:2}
+.k .top .ten{font-size:15px; font-weight:600}
+.k .top .phu{font-size:13px; color:var(--ink-3); margin-left:auto; text-align:right}
+
+.k h1{font-size:26px; font-weight:700; letter-spacing:-.025em; margin:14px 0 0; text-wrap:balance}
+.k h2{font-size:16px; font-weight:600; margin:26px 0 10px; letter-spacing:-.01em}
+.k .sub{color:var(--ink-2); font-size:14px; margin:6px 0 0}
+
+/* xong chưa */
+.k .doi{display:flex; gap:10px; margin-top:12px}
+.k .doi button{
+  flex:1; appearance:none; min-height:54px; border-radius:var(--r); cursor:pointer; font:inherit;
+  font-size:16px; font-weight:600; color:var(--ink); background:var(--field); border:1.5px solid transparent;
+  transition:transform .12s var(--ease), border-color .18s, background .18s, color .18s;
+}
+.k .doi button:active{transform:scale(.97)}
+.k .doi button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.k .doi button.xau[aria-pressed="true"]{background:var(--warn); border-color:var(--warn); color:#fff}
+
+/* hàng mặt cười */
+.k .mat{display:flex; justify-content:space-between; gap:6px; margin-top:4px}
+.k .mat button{
+  appearance:none; background:none; border:0; padding:0; cursor:pointer; flex:1;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+.k .mat .vong{
+  width:100%; max-width:58px; aspect-ratio:1/1; border-radius:50%; background:var(--field);
+  display:flex; align-items:center; justify-content:center; font-size:26px; line-height:1;
+  position:relative; transition:transform .16s var(--ease), background .18s, box-shadow .18s;
+}
+.k .mat button:active .vong{transform:scale(.9)}
+.k .mat button[aria-pressed="true"] .vong{
+  background:var(--accent); transform:scale(1.08); box-shadow:0 8px 20px rgba(27,92,255,.30);
+}
+.k .mat button[aria-pressed="true"] .vong::after{
+  content:"✓"; position:absolute; top:-3px; right:-3px; width:20px; height:20px; border-radius:50%;
+  background:var(--bg); color:var(--accent); font-size:12px; font-weight:800;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 1.5px var(--accent);
+}
+.k .mat .nhan{font-size:12px; font-weight:600; color:transparent; transition:color .18s}
+.k .mat button[aria-pressed="true"] .nhan{color:var(--accent)}
+
+/* danh sách tick */
+.k .ds{list-style:none; margin:0; padding:0}
+.k .ds li{border-bottom:1px solid var(--line)}
+.k .ds li:last-child{border-bottom:0}
+.k .ds button{
+  width:100%; appearance:none; background:none; border:0; cursor:pointer; font:inherit; color:var(--ink);
+  display:flex; align-items:center; gap:14px; padding:15px 2px; text-align:left;
+}
+.k .ds .chu{flex:1; font-size:16px}
+.k .ds .o{width:24px; height:24px; border-radius:50%; border:1.8px solid var(--line); flex:none;
+          display:flex; align-items:center; justify-content:center; color:transparent; font-size:13px;
+          font-weight:800; transition:background .18s, border-color .18s, color .18s}
+.k .ds button[aria-pressed="true"] .o{background:var(--tick); border-color:var(--tick); color:#fff}
+
+.k textarea{
+  width:100%; min-height:104px; padding:14px 16px; font:inherit; font-size:16px; color:var(--ink);
+  background:var(--bg); border:1.5px solid var(--line); border-radius:var(--r); resize:none; margin-top:4px;
+}
+.k textarea::placeholder{color:var(--ink-3)}
+.k textarea:focus{outline:none; border-color:var(--accent)}
+
+.k .mic{
+  width:100%; appearance:none; min-height:52px; border-radius:var(--r); cursor:pointer; font:inherit;
+  font-size:16px; font-weight:600; color:var(--accent); background:var(--accent-soft); border:0;
+  display:flex; align-items:center; justify-content:center; gap:10px; margin-top:10px;
+  transition:transform .12s var(--ease), background .18s, color .18s;
+}
+.k .mic:active{transform:scale(.97)}
+.k .mic.thu{background:var(--accent); color:var(--accent-ink)}
+.k .mic svg{width:19px; height:19px; fill:currentColor; flex:none}
+.k .giay{font-variant-numeric:tabular-nums}
+.k .song{display:flex; align-items:center; gap:3px; height:16px}
+.k .song i{width:3px; border-radius:99px; background:currentColor; height:4px; animation:kNhay .9s var(--ease) infinite}
+.k .song i:nth-child(2){animation-delay:.12s}
+.k .song i:nth-child(3){animation-delay:.24s}
+.k .song i:nth-child(4){animation-delay:.36s}
+@keyframes kNhay{0%,100%{height:4px}50%{height:15px}}
+
+.k .daghi{display:flex; align-items:center; gap:12px; padding:13px 16px; border-radius:var(--r);
+          background:var(--accent-soft); margin-top:10px; font-size:15px}
+.k .daghi b{font-variant-numeric:tabular-nums}
+.k .daghi .x{margin-left:auto; appearance:none; border:0; background:none; color:var(--accent);
+             font:inherit; font-size:15px; font-weight:600; cursor:pointer; padding:4px}
+.k .ghichu{font-size:13px; color:var(--ink-3); margin:8px 0 0}
+.k .loi{font-size:14px; color:var(--warn); margin:10px 0 0}
+
+.k .gui{
+  width:100%; appearance:none; min-height:56px; margin-top:26px; border-radius:var(--r); border:0;
+  background:var(--accent); color:var(--accent-ink); font:inherit; font-size:17px; font-weight:700;
+  cursor:pointer; transition:transform .12s var(--ease), opacity .18s;
+}
+.k .gui:active{transform:scale(.98)}
+.k .gui:disabled{opacity:.45; cursor:default}
+
+.k .xong-man{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+             text-align:center; gap:16px; padding-bottom:40px}
+.k .tick-to{width:86px; height:86px; border-radius:50%; background:var(--accent-soft); color:var(--tick);
+            display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:800;
+            animation:kPop .5s var(--ease)}
+@keyframes kPop{from{transform:scale(.6); opacity:0} to{transform:none; opacity:1}}
+
+.k .gui:focus-visible,.k .mic:focus-visible,.k .doi button:focus-visible,
+.k .mat button:focus-visible,.k .ds button:focus-visible{outline:2.5px solid var(--accent); outline-offset:3px}
+
+@media (prefers-reduced-motion:reduce){
+  .k *{animation:none!important}
+  .k .doi button:active,.k .mat button:active .vong,.k .gui:active,.k .mic:active{transform:none}
+}
