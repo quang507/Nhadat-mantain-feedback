@@ -118,7 +118,11 @@ async function ensureBranch(): Promise<void> {
     body: JSON.stringify({ ref: `refs/heads/${BRANCH}`, sha }),
   });
   if (!created.ok && created.status !== 422) {
-    if (created.status === 403) throw new Error(THIEU_QUYEN);
+    if (created.status === 403) {
+      // GitHub nói thẳng nó cần quyền gì trong header này - chép ra để khỏi đoán.
+      const can = created.headers.get('x-accepted-github-permissions') ?? 'không có';
+      throw new Error(`${THIEU_QUYEN} (GitHub đòi: ${can})`);
+    }
     const chiTiet = await created.text().catch(() => '');
     throw new Error(`Không tạo được nhánh ${BRANCH} (${created.status}): ${chiTiet.slice(0, 200)}`);
   }
@@ -153,7 +157,10 @@ async function ghWrite(file: string, body: string, message: string): Promise<voi
     }),
   });
   if (!res.ok) {
-    if (res.status === 403) throw new Error(THIEU_QUYEN);
+    if (res.status === 403) {
+      const can = res.headers.get('x-accepted-github-permissions') ?? 'không có';
+      throw new Error(`${THIEU_QUYEN} (GitHub đòi: ${can})`);
+    }
     const chiTiet = await res.text().catch(() => '');
     throw new Error(`Ghi ${file} lỗi ${res.status}: ${chiTiet.slice(0, 200)}`);
   }
