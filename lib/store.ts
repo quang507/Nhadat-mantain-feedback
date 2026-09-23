@@ -72,11 +72,15 @@ async function localList(dir: string): Promise<string[]> {
 
 /* ---------- ngăn GitHub ---------- */
 
-function ghHeaders() {
+function ghHeaders(coBody = false): Record<string, string> {
   return {
-    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    // Token lấy qua trim: dán vào bảng cấu hình rất dễ dính khoảng trắng hoặc xuống dòng,
+    // mà header có ký tự lạ thì cả lời gọi hỏng chứ không báo gì rõ ràng.
+    Authorization: `Bearer ${(process.env.GITHUB_TOKEN || '').trim()}`,
     Accept: 'application/vnd.github+json',
-    'Content-Type': 'application/json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'User-Agent': 'nhadat-bao-tri',   // GitHub đòi User-Agent, thiếu là bị chặn
+    ...(coBody ? { 'Content-Type': 'application/json' } : {}),
   };
 }
 
@@ -97,7 +101,7 @@ async function ensureBranch(): Promise<void> {
   const sha = (await main.json())?.object?.sha;
   const created = await fetch(`${API}/git/refs`, {
     method: 'POST',
-    headers: ghHeaders(),
+    headers: ghHeaders(true),
     body: JSON.stringify({ ref: `refs/heads/${BRANCH}`, sha }),
   });
   if (!created.ok && created.status !== 422) {
@@ -126,7 +130,7 @@ async function ghWrite(file: string, body: string, message: string): Promise<voi
   const cur = await ghRead(file);
   const res = await fetch(`${API}/contents/${file}`, {
     method: 'PUT',
-    headers: ghHeaders(),
+    headers: ghHeaders(true),
     body: JSON.stringify({
       message,
       content: Buffer.from(body, 'utf8').toString('base64'),
@@ -192,7 +196,7 @@ export async function luuVoice(woId: string, duoi: string, data: Buffer): Promis
     const cur = await ghRead(file);
     const res = await fetch(`${API}/contents/${file}`, {
       method: 'PUT',
-      headers: ghHeaders(),
+      headers: ghHeaders(true),
       body: JSON.stringify({
         message: `${woId}: lời nhắn bằng giọng nói của khách`,
         content: data.toString('base64'),
@@ -236,14 +240,23 @@ export async function thuGhi(): Promise<{ ok: boolean; ghiChu: string; buoc?: st
 
   if (dungGithub()) {
     // Đi từng bước để biết hỏng ở đâu, vì "không ghi được" có cả chục lý do khác nhau.
+    const tk = (process.env.GITHUB_TOKEN || '').trim();
+    buoc.push(`token: dài ${tk.length}, bắt đầu bằng ${tk.slice(0, 11)}…`);
+    try {
+      const khongToken = await fetch('https://api.github.com/zen', {
+        headers: { 'User-Agent': 'nhadat-bao-tri' },
+        cache: 'no-store',
+      });
+      buoc.push(`gọi GitHub không kèm token: ${khongToken.status}`);
+    } catch (err) {
+      buoc.push(`gọi GitHub không kèm token hỏng: ${String(err).slice(0, 120)}`);
+    }
     try {
       const repo = await fetch(API, { headers: ghHeaders(), cache: 'no-store' });
-      buoc.push(`đọc repo: ${repo.status}`);
-      const ref = await fetch(`${API}/git/refs/heads/${SRC_BRANCH}`, { headers: ghHeaders(), cache: 'no-store' });
-      const refBody = await ref.text().catch(() => '');
-      buoc.push(`đọc nhánh ${SRC_BRANCH}: ${ref.status} ${refBody.slice(0, 120)}`);
+      const repoBody = await repo.text().catch(() => '');
+      buoc.push(`đọc repo: ${repo.status} ${repoBody.slice(0, 120)}`);
     } catch (err) {
-      buoc.push(`gọi GitHub hỏng: ${String(err)}`);
+      buoc.push(`đọc repo hỏng: ${String(err).slice(0, 120)}`);
     }
   }
 
