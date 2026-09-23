@@ -254,9 +254,36 @@ export async function thuGhi(): Promise<{ ok: boolean; ghiChu: string; buoc?: st
     try {
       const repo = await fetch(API, { headers: ghHeaders(), cache: 'no-store' });
       const repoBody = await repo.text().catch(() => '');
-      buoc.push(`đọc repo: ${repo.status} ${repoBody.slice(0, 120)}`);
+      const reqId = repo.headers.get('x-github-request-id');
+      const server = repo.headers.get('server');
+      buoc.push(
+        `đọc repo: ${repo.status} · server=${server ?? 'không có'} · github-request-id=${reqId ?? 'không có'} · ${repoBody.slice(0, 100)}`,
+      );
     } catch (err) {
       buoc.push(`đọc repo hỏng: ${String(err).slice(0, 120)}`);
+    }
+
+    // Thử kiểu header cũ (token ...) và một endpoint không cần quyền gì,
+    // để tách bạch: hỏng vì cách gửi token, hay vì chính repo này.
+    try {
+      const kieuCu = await fetch(API, {
+        headers: {
+          Authorization: `token ${tk}`,
+          Accept: 'application/vnd.github+json',
+          'User-Agent': 'nhadat-bao-tri',
+        },
+        cache: 'no-store',
+      });
+      buoc.push(`đọc repo kiểu "token": ${kieuCu.status}`);
+    } catch (err) {
+      buoc.push(`đọc repo kiểu "token" hỏng: ${String(err).slice(0, 100)}`);
+    }
+    try {
+      const me = await fetch('https://api.github.com/user', { headers: ghHeaders(), cache: 'no-store' });
+      const meBody = await me.text().catch(() => '');
+      buoc.push(`hỏi token của ai: ${me.status} ${meBody.slice(0, 100)}`);
+    } catch (err) {
+      buoc.push(`hỏi token của ai hỏng: ${String(err).slice(0, 100)}`);
     }
   }
 
