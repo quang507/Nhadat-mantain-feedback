@@ -229,14 +229,29 @@ export async function docVoice(woId: string, duoi: string): Promise<Buffer | nul
  * Thử ghi một file nhỏ để biết chắc máy chủ có quyền lưu dữ liệu hay không,
  * và nếu hỏng thì hỏng ở đâu. Chỉ trang quản trị gọi được (xem /api/health).
  */
-export async function thuGhi(): Promise<{ ok: boolean; ghiChu: string }> {
+export async function thuGhi(): Promise<{ ok: boolean; ghiChu: string; buoc?: string[] }> {
   const file = '.kiem-tra-ghi.json';
   const noiDung = JSON.stringify({ luc: new Date().toISOString() }, null, 2);
+  const buoc: string[] = [];
+
+  if (dungGithub()) {
+    // Đi từng bước để biết hỏng ở đâu, vì "không ghi được" có cả chục lý do khác nhau.
+    try {
+      const repo = await fetch(API, { headers: ghHeaders(), cache: 'no-store' });
+      buoc.push(`đọc repo: ${repo.status}`);
+      const ref = await fetch(`${API}/git/refs/heads/${SRC_BRANCH}`, { headers: ghHeaders(), cache: 'no-store' });
+      const refBody = await ref.text().catch(() => '');
+      buoc.push(`đọc nhánh ${SRC_BRANCH}: ${ref.status} ${refBody.slice(0, 120)}`);
+    } catch (err) {
+      buoc.push(`gọi GitHub hỏng: ${String(err)}`);
+    }
+  }
+
   try {
     await writeFile(file, noiDung, 'kiểm tra quyền ghi');
-    return { ok: true, ghiChu: dungGithub() ? `Ghi được lên nhánh ${BRANCH}` : 'Ghi được vào thư mục tạm' };
+    return { ok: true, ghiChu: dungGithub() ? `Ghi được lên nhánh ${BRANCH}` : 'Ghi được vào thư mục tạm', buoc };
   } catch (err) {
-    return { ok: false, ghiChu: String(err instanceof Error ? err.message : err) };
+    return { ok: false, ghiChu: String(err instanceof Error ? err.message : err), buoc };
   }
 }
 
