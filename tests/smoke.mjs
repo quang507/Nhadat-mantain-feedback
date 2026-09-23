@@ -16,10 +16,16 @@ function kiemTra(dieuKien, mo_ta) {
 }
 
 // CHROME_PATH để chỉ tay vào Chromium có sẵn; bỏ trống thì để Playwright tự tìm.
-const browser = await chromium.launch(
-  process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {},
-);
-const bql = await browser.newContext();
+const browser = await chromium.launch({
+  ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
+  // HTTPS_PROXY khi chạy trong môi trường CI có proxy bắt buộc.
+  ...(process.env.HTTPS_PROXY
+    ? { proxy: { server: process.env.HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } }
+    : {}),
+});
+// IGNORE_CERT=1 khi chạy sau proxy có chứng chỉ riêng (CI nội bộ), đừng bật khi kiểm thử thật.
+const ctxOpts = process.env.IGNORE_CERT === '1' ? { ignoreHTTPSErrors: true } : {};
+const bql = await browser.newContext(ctxOpts);
 const trangBQL = await bql.newPage();
 
 try {
@@ -57,12 +63,14 @@ try {
   kiemTra(link.includes('/f/'), `có link đánh giá (${link.slice(0, 40)}…)`);
 
   console.log('4. Khách mở link, chấm điểm (trình duyệt riêng, không đăng nhập)');
-  const khach = await browser.newContext();
+  const khach = await browser.newContext(ctxOpts);
   const trangKhach = await khach.newPage();
   await trangKhach.goto(link);
   kiemTra((await trangKhach.locator('h1').innerText()) === 'Nhận xét công việc', 'khách mở được form');
   kiemTra(!(await trangKhach.locator('body').innerText()).includes('0900000000'), 'form của khách không in số điện thoại ra màn hình');
 
+  // đợi trang chạy được JS rồi mới bấm - đúng như khách thật phải đợi
+  await trangKhach.waitForSelector('button:has-text("Đã xong"):not([disabled])', { timeout: 20000 });
   const guiTruocKhiDu = await trangKhach.locator('button:has-text("Gửi nhận xét")').isDisabled();
   kiemTra(guiTruocKhiDu, 'chưa chấm đủ thì chưa cho gửi');
 
@@ -97,7 +105,7 @@ try {
   kiemTra(bang.includes('Anh Hùng'), 'bảng thưởng có tên thợ');
 
   console.log('8. Khách chưa đăng nhập không xem được trang quản trị');
-  const la = await browser.newContext();
+  const la = await browser.newContext(ctxOpts);
   const trangLa = await la.newPage();
   await trangLa.goto(`${BASE}/admin`);
   kiemTra(trangLa.url().includes('/login'), 'trang quản trị bắt đăng nhập');

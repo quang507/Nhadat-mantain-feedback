@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CRITERIA, type CriteriaKey } from '@/lib/types';
 
 interface Props {
@@ -22,8 +22,13 @@ export default function FormDanhGia(p: Props) {
   const [yKien, setYKien] = useState('');
   const [nguoi, setNguoi] = useState(p.khach);
   const [dangGui, setDangGui] = useState(false);
+  // Trang gửi từ máy chủ xong mới chạy JS. Bấm trước lúc đó thì cái bấm bị mất mà khách
+  // không biết — nên khóa nút tới khi thật sự bấm được (mạng 4G chậm thì thấy rõ).
+  const [sanSang, setSanSang] = useState(false);
   const [loi, setLoi] = useState('');
   const [xong, setXong] = useState(false);
+
+  useEffect(() => setSanSang(true), []);
 
   const thieuSao = CRITERIA.some((c) => ratings[c.key] === 0);
   const canYKien = daXong === false || CRITERIA.some((c) => ratings[c.key] > 0 && ratings[c.key] <= 2);
@@ -82,8 +87,8 @@ export default function FormDanhGia(p: Props) {
       <div className="card pad-lg">
         <label>Công việc đã xong chưa?</label>
         <div className="yesno">
-          <button type="button" aria-pressed={daXong === true} onClick={() => setDaXong(true)}>Đã xong</button>
-          <button type="button" aria-pressed={daXong === false} onClick={() => setDaXong(false)}>Chưa xong</button>
+          <button type="button" disabled={!sanSang} aria-pressed={daXong === true} onClick={() => setDaXong(true)}>Đã xong</button>
+          <button type="button" disabled={!sanSang} aria-pressed={daXong === false} onClick={() => setDaXong(false)}>Chưa xong</button>
         </div>
 
         {CRITERIA.map((c) => (
@@ -94,6 +99,7 @@ export default function FormDanhGia(p: Props) {
                 <button
                   key={n}
                   type="button"
+                  disabled={!sanSang}
                   aria-label={`${c.label}: ${n} sao`}
                   aria-pressed={ratings[c.key] === n}
                   onClick={() => setRatings({ ...ratings, [c.key]: n })}
@@ -114,19 +120,21 @@ export default function FormDanhGia(p: Props) {
         {loi && <p className="err" style={{ marginTop: 14 }}>{loi}</p>}
 
         <div className="btn-row">
-          <button type="button" disabled={!hopLe || dangGui} onClick={gui}>
+          <button type="button" disabled={!sanSang || !hopLe || dangGui} onClick={gui}>
             {dangGui ? 'Đang gửi…' : 'Gửi nhận xét'}
           </button>
         </div>
-        {!hopLe && (
+        {(!hopLe || !sanSang) && (
           <p className="muted" style={{ marginTop: 8 }}>
-            {daXong === null
+            {!sanSang
+              ? 'Đang tải, anh/chị đợi một giây…'
+              : daXong === null
               ? 'Anh/chị chọn giúp công việc đã xong chưa.'
               : thieuSao
                 ? 'Anh/chị chấm giúp đủ 4 mục ở trên (1 là kém, 5 là rất tốt).'
                 : canYKien
-                  ? 'Anh/chị ghi giúp vài chữ để Ban quản lý biết đường xử lý.'
-                  : 'Anh/chị điền tên người nhận xét.'}
+                    ? 'Anh/chị ghi giúp vài chữ để Ban quản lý biết đường xử lý.'
+                    : 'Anh/chị điền tên người nhận xét.'}
           </p>
         )}
       </div>
