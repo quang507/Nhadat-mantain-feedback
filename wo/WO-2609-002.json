@@ -1,0 +1,24 @@
+{
+  "id": "WO-2609-002",
+  "unitId": 29,
+  "khach": "thu",
+  "sdt": "",
+  "kenh": "hotline",
+  "hangMuc": "Cấp thoát nước",
+  "moTa": "rò nước toilet",
+  "tho": "Tài",
+  "trangThai": "dang_lam",
+  "taoLuc": "2026-09-24T07:08:05.004Z",
+  "log": [
+    {
+      "luc": "2026-09-24T07:08:05.004Z",
+      "ai": "BQL",
+      "viec": "Tiếp nhận từ hotline"
+    },
+    {
+      "luc": "2026-09-24T07:08:05.004Z",
+      "ai": "BQL",
+      "viec": "Giao cho thợ Tài"
+    }
+  ]
+}
