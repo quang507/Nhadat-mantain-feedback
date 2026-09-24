@@ -7,7 +7,7 @@
   "hangMuc": "Khác",
   "moTa": "Sửa mặt tiền",
   "tho": "Anh A",
-  "trangThai": "dang_lam",
+  "trangThai": "cho_danh_gia",
   "taoLuc": "2026-09-24T01:24:15.247Z",
   "log": [
     {
@@ -19,6 +19,13 @@
       "luc": "2026-09-24T01:24:15.247Z",
       "ai": "BQL",
       "viec": "Giao cho thợ Anh A"
+    },
+    {
+      "luc": "2026-09-24T01:24:27.103Z",
+      "ai": "BQL",
+      "viec": "Thợ báo xong — phát link đánh giá cho khách"
     }
-  ]
+  ],
+  "xongLuc": "2026-09-24T01:24:27.103Z",
+  "token": "eyJ3byI6IldPLTI2MDktMDAxIiwianRpIjoiODIwYWYzYzc5MTMyMjZiOCIsImV4cCI6MTc5MjgwNTA2N30.J2COVJG8kPIquiYmS82Vj5AhcmiQNH7MnjVOrofMEVQ"
 }
