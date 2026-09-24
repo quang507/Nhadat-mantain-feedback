@@ -7,7 +7,7 @@
   "hangMuc": "Cấp thoát nước",
   "moTa": "rò nước toilet",
   "tho": "Tài",
-  "trangThai": "dang_lam",
+  "trangThai": "cho_danh_gia",
   "taoLuc": "2026-09-24T07:08:05.004Z",
   "log": [
     {
@@ -19,6 +19,13 @@
       "luc": "2026-09-24T07:08:05.004Z",
       "ai": "BQL",
       "viec": "Giao cho thợ Tài"
+    },
+    {
+      "luc": "2026-09-24T07:08:11.144Z",
+      "ai": "BQL",
+      "viec": "Thợ báo xong — phát link đánh giá cho khách"
     }
-  ]
+  ],
+  "xongLuc": "2026-09-24T07:08:11.144Z",
+  "token": "eyJ3byI6IldPLTI2MDktMDAyIiwianRpIjoiMGU3ZTYyOGQ5NGFhNmUyNyIsImV4cCI6MTc5MjgyNTY5MX0.noA3oOfwGwzKtZP64Xk6MSg01F_a1yFDzcBC10na-as"
 }
